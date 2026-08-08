@@ -18,8 +18,8 @@ export interface NavItem {
 export const NAV_ITEMS: NavItem[] = [
   { label: 'AI Chat', href: '/chat', icon: MessageSquare },
   { label: 'File Analysis', href: '/file-analysis', icon: FolderSearch },
-  { label: 'Vulnerability Scanner', href: '/vulnerability-scanner', icon: ShieldAlert, comingSoon: true },
-  { label: 'Log Analysis', href: '/log-analysis', icon: ScrollText, comingSoon: true },
-  { label: 'Reports', href: '/reports', icon: FileText, comingSoon: true },
+  { label: 'Vulnerability Scanner', href: '/vulnerability-scanner', icon: ShieldAlert },
+  { label: 'Log Analysis', href: '/log-analysis', icon: ScrollText },
+  { label: 'Reports', href: '/reports', icon: FileText },
   { label: 'Settings', href: '/settings', icon: Settings },
 ];

@@ -5,10 +5,12 @@ try:
     from models import AnalysisResponse, ReportResponse
     from services.analysis_service import analyze_security_file
     from services.finding_service import get_analysis_result, generate_markdown_report
+    from repositories.report_repository import MongoReportRepository
 except (ImportError, ModuleNotFoundError):
     from ..models import AnalysisResponse, ReportResponse
     from ..services.analysis_service import analyze_security_file
     from ..services.finding_service import get_analysis_result, generate_markdown_report
+    from ..repositories.report_repository import MongoReportRepository
 
 router = APIRouter()
 
@@ -34,6 +36,11 @@ async def get_analysis(analysis_id: str):
     if not result:
         raise HTTPException(status_code=404, detail=f"Analysis ID '{analysis_id}' not found.")
     return result
+
+@router.get("/reports")
+async def list_reports():
+    """Lists all executive security reports stored in MongoDB Atlas."""
+    return await MongoReportRepository.list_reports()
 
 @router.post("/analysis/{analysis_id}/report", response_model=ReportResponse)
 async def create_analysis_report(analysis_id: str):

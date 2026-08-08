@@ -1,16 +1,30 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Settings, Moon, Sun, Monitor, Cpu, Server, Database, Save, RotateCcw } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Settings, Moon, Sun, Monitor, Server, Save, CheckCircle2, XCircle, Info, ShieldCheck } from 'lucide-react';
 import { useTheme } from '@/hooks/useTheme';
+import { config } from '@/lib/config';
 
 export default function SettingsPage() {
   const { theme, setTheme } = useTheme();
-  const [model, setModel] = useState('phi3:mini');
-  const [backendUrl, setBackendUrl] = useState('http://localhost:8000');
-  const [chunkSize, setChunkSize] = useState('512');
-  const [embeddingModel, setEmbeddingModel] = useState('nomic-embed-text');
   const [isSaved, setIsSaved] = useState(false);
+  const [apiHealth, setApiHealth] = useState<'checking' | 'healthy' | 'unreachable'>('checking');
+
+  useEffect(() => {
+    async function checkHealth() {
+      try {
+        const res = await fetch(`${config.apiBaseUrl}/`);
+        if (res.ok) {
+          setApiHealth('healthy');
+        } else {
+          setApiHealth('unreachable');
+        }
+      } catch {
+        setApiHealth('unreachable');
+      }
+    }
+    checkHealth();
+  }, []);
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,12 +37,12 @@ export default function SettingsPage() {
       <div className="max-w-3xl w-full mx-auto flex flex-col gap-6">
         {/* Header */}
         <div className="flex items-center gap-3 border-b border-border pb-4">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20">
             <Settings size={22} />
           </div>
           <div>
-            <h1 className="text-xl font-semibold tracking-tight text-foreground">Settings & Preferences</h1>
-            <p className="text-xs text-muted-foreground">Configure AI models, theme, backend endpoints, and RAG pipeline defaults.</p>
+            <h1 className="text-xl font-bold tracking-tight text-foreground">Settings & System Preferences</h1>
+            <p className="text-xs text-muted-foreground">Configure interface appearance, verify backend status, and inspect system information.</p>
           </div>
         </div>
 
@@ -37,7 +51,7 @@ export default function SettingsPage() {
           <div className="rounded-xl border border-border bg-card p-5 shadow-xs flex flex-col gap-4">
             <div className="flex items-center gap-2 font-medium text-sm text-foreground">
               <Sun size={18} className="text-primary" />
-              <span>Appearance</span>
+              <span>Interface Appearance</span>
             </div>
             <div className="grid grid-cols-3 gap-3">
               <button
@@ -79,91 +93,56 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          {/* Model & AI Settings */}
-          <div className="rounded-xl border border-border bg-card p-5 shadow-xs flex flex-col gap-4">
-            <div className="flex items-center gap-2 font-medium text-sm text-foreground">
-              <Cpu size={18} className="text-primary" />
-              <span>Ollama AI Model Configuration</span>
-            </div>
-            <div className="flex flex-col gap-2">
-              <label htmlFor="model-select" className="text-xs text-muted-foreground">
-                Default LLM Model
-              </label>
-              <select
-                id="model-select"
-                value={model}
-                onChange={(e) => setModel(e.target.value)}
-                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-              >
-                <option value="phi3:mini">phi3:mini (3.8B - Fast CPU)</option>
-                <option value="llama3:8b">llama3:8b (8B - Balanced)</option>
-                <option value="mistral:7b">mistral:7b (7B - Reasoning)</option>
-                <option value="deepseek-coder">deepseek-coder (6.7B - Security Code)</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Backend Server Settings */}
+          {/* Backend Connection Status */}
           <div className="rounded-xl border border-border bg-card p-5 shadow-xs flex flex-col gap-4">
             <div className="flex items-center gap-2 font-medium text-sm text-foreground">
               <Server size={18} className="text-primary" />
-              <span>Backend API Server</span>
+              <span>Backend API Server Status</span>
             </div>
-            <div className="flex flex-col gap-2">
-              <label htmlFor="backend-url" className="text-xs text-muted-foreground">
-                FastAPI Base URL
-              </label>
-              <div className="flex gap-2">
-                <input
-                  id="backend-url"
-                  type="url"
-                  value={backendUrl}
-                  onChange={(e) => setBackendUrl(e.target.value)}
-                  className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-                  placeholder="http://localhost:8000"
-                />
-                <button
-                  type="button"
-                  onClick={() => setBackendUrl('http://localhost:8000')}
-                  className="px-3 py-2 rounded-lg border border-border bg-muted/50 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors flex items-center gap-1.5"
-                >
-                  <RotateCcw size={14} />
-                  <span>Reset</span>
-                </button>
+            <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/40 text-xs">
+              <div className="flex items-center gap-2">
+                <span className="font-mono text-muted-foreground">{config.apiBaseUrl}</span>
+              </div>
+              <div className="flex items-center gap-1.5 font-medium">
+                {apiHealth === 'checking' ? (
+                  <span className="text-muted-foreground">Checking...</span>
+                ) : apiHealth === 'healthy' ? (
+                  <>
+                    <CheckCircle2 size={16} className="text-emerald-500" />
+                    <span className="text-emerald-500">Connected & Online</span>
+                  </>
+                ) : (
+                  <>
+                    <XCircle size={16} className="text-red-500" />
+                    <span className="text-red-500">Unreachable</span>
+                  </>
+                )}
               </div>
             </div>
           </div>
 
-          {/* RAG & Embedding Pipeline Defaults */}
+          {/* Application Info */}
           <div className="rounded-xl border border-border bg-card p-5 shadow-xs flex flex-col gap-4">
             <div className="flex items-center gap-2 font-medium text-sm text-foreground">
-              <Database size={18} className="text-primary" />
-              <span>RAG Vector DB Pipeline (Future Milestone)</span>
+              <Info size={18} className="text-primary" />
+              <span>Application System Information</span>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="flex flex-col gap-2">
-                <label htmlFor="embedding-model" className="text-xs text-muted-foreground">
-                  Embeddings Model
-                </label>
-                <input
-                  id="embedding-model"
-                  type="text"
-                  value={embeddingModel}
-                  onChange={(e) => setEmbeddingModel(e.target.value)}
-                  className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-                />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+              <div className="flex flex-col gap-1 p-3 rounded-lg border border-border bg-muted/40">
+                <span className="text-muted-foreground">Application Version</span>
+                <span className="font-semibold text-foreground">SentinelForge v1.0.0</span>
               </div>
-              <div className="flex flex-col gap-2">
-                <label htmlFor="chunk-size" className="text-xs text-muted-foreground">
-                  Document Chunk Size (Tokens)
-                </label>
-                <input
-                  id="chunk-size"
-                  type="number"
-                  value={chunkSize}
-                  onChange={(e) => setChunkSize(e.target.value)}
-                  className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-                />
+              <div className="flex flex-col gap-1 p-3 rounded-lg border border-border bg-muted/40">
+                <span className="text-muted-foreground">Cloud LLM Engine</span>
+                <span className="font-semibold text-foreground">Groq Llama-3.1-8B-Instant</span>
+              </div>
+              <div className="flex flex-col gap-1 p-3 rounded-lg border border-border bg-muted/40">
+                <span className="text-muted-foreground">Database Persistence</span>
+                <span className="font-semibold text-foreground">MongoDB Atlas (`sentinelforge`)</span>
+              </div>
+              <div className="flex flex-col gap-1 p-3 rounded-lg border border-border bg-muted/40">
+                <span className="text-muted-foreground">Security Engine</span>
+                <span className="font-semibold text-foreground">SAST + RAG Audit Pipeline</span>
               </div>
             </div>
           </div>
@@ -171,7 +150,7 @@ export default function SettingsPage() {
           {/* Save Action */}
           <div className="flex items-center justify-end gap-3 pt-2">
             {isSaved && (
-              <span className="text-xs font-medium text-success animate-fade-in">
+              <span className="text-xs font-medium text-success">
                 Preferences saved successfully!
               </span>
             )}

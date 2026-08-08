@@ -1,0 +1,7 @@
+.container {
+  color: var(--text);
+}
+
+.paragraph {
+  margin: 0 0 0.75rem 0;
+}

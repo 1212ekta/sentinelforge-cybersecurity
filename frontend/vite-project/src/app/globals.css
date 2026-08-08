@@ -1,0 +1,111 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222 47% 11%;
+
+    --sidebar: 220 20% 97%;
+    --sidebar-foreground: 222 47% 11%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+
+    --primary: 217 91% 60%;
+    --primary-foreground: 0 0% 100%;
+
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 9% 46%;
+
+    --border: 220 13% 91%;
+    --ring: 217 91% 60%;
+
+    --danger: 0 84% 60%;
+    --success: 142 71% 45%;
+  }
+
+  .dark {
+    --background: 222 47% 6%;
+    --foreground: 210 20% 96%;
+
+    --sidebar: 222 47% 8%;
+    --sidebar-foreground: 210 20% 90%;
+
+    --card: 222 40% 10%;
+    --card-foreground: 210 20% 96%;
+
+    --primary: 217 91% 60%;
+    --primary-foreground: 222 47% 6%;
+
+    --muted: 222 30% 14%;
+    --muted-foreground: 220 10% 60%;
+
+    --border: 222 25% 18%;
+    --ring: 217 91% 60%;
+
+    --danger: 0 72% 51%;
+    --success: 142 69% 45%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+}
+
+@keyframes messageEnter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes dotPulse {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+
+.animate-message-enter {
+  animation: messageEnter 180ms ease-out forwards;
+}
+
+.animate-slide-in-left {
+  animation: slideInLeft 200ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-dot-pulse {
+  animation: dotPulse 1.2s infinite ease-in-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-message-enter,
+  .animate-slide-in-left,
+  .animate-dot-pulse {
+    animation: none !important;
+    transition: none !important;
+  }
+}

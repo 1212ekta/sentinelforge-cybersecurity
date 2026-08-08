@@ -1,0 +1,35 @@
+# Environment & Secret Files
+.env
+.env.local
+.env.*.local
+*.env
+
+# Dependencies & Build Outputs
+node_modules/
+dist/
+build/
+.next/
+out/
+
+# Python Virtual Environments & Caches
+venv/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Database & Storage Files
+*.db
+*.sqlite
+sentinelforge.db
+sentinelforge_db.sqlite
+rag_storage/
+chroma/
+temp_uploads/
+
+# IDE & OS Artifacts
+.DS_Store
+.vscode/
+.idea/
+*.log

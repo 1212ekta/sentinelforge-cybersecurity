@@ -15,8 +15,7 @@ try:
         SeverityEnum,
         ConfidenceEnum,
     )
-    from db.database import SessionLocal
-    from db.repositories.analysis_repository import AnalysisRepository
+    from repositories.analysis_repository import MongoAnalysisRepository
     from services.finding_service import compute_statistics, compute_overall_risk
 except (ImportError, ModuleNotFoundError):
     from ..models import (
@@ -25,8 +24,7 @@ except (ImportError, ModuleNotFoundError):
         SeverityEnum,
         ConfidenceEnum,
     )
-    from ..db.database import SessionLocal
-    from ..db.repositories.analysis_repository import AnalysisRepository
+    from ..repositories.analysis_repository import MongoAnalysisRepository
     from ..services.finding_service import compute_statistics, compute_overall_risk
 
 load_dotenv()
@@ -155,11 +153,9 @@ async def analyze_security_file(content_bytes: bytes, filename: str) -> Analysis
     risk_level = compute_overall_risk(stats)
     processing_time = round(time.time() - start_time, 3)
 
-    # 3. Save to Database Repository
-    db = SessionLocal()
+    # 3. Save to MongoDB Repository
     try:
-        AnalysisRepository.save_analysis(
-            db=db,
+        await MongoAnalysisRepository.save_analysis(
             analysis_id=analysis_id,
             filename=clean_name,
             file_type=file_type,
@@ -168,8 +164,8 @@ async def analyze_security_file(content_bytes: bytes, filename: str) -> Analysis
             processing_time=processing_time,
             findings_data=[f.model_dump() for f in findings]
         )
-    finally:
-        db.close()
+    except Exception as db_err:
+        logger.warning(f"MongoDB persistence warning during file analysis: {db_err}")
 
     return AnalysisResponse(
         success=True,

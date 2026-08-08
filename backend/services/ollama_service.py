@@ -8,20 +8,19 @@ from typing import Dict, List, Any, Optional
 from dotenv import load_dotenv
 
 try:
-    from db.database import SessionLocal, init_db
-    from db.repositories.conversation_repository import ConversationRepository
+    from database import init_mongo_db
+    from repositories.conversation_repository import MongoConversationRepository
     from prompts.security_system_prompt import get_security_system_prompt
     from prompts.prompt_builder import build_cybersecurity_prompt
     from rag.rag_service import rag_service
 except (ImportError, ModuleNotFoundError):
-    from ..db.database import SessionLocal, init_db
-    from ..db.repositories.conversation_repository import ConversationRepository
+    from ..database import init_mongo_db
+    from ..repositories.conversation_repository import MongoConversationRepository
     from ..prompts.security_system_prompt import get_security_system_prompt
     from ..prompts.prompt_builder import build_cybersecurity_prompt
     from ..rag.rag_service import rag_service
 
 load_dotenv()
-init_db()  # Ensure database tables are initialized
 
 logger = logging.getLogger("sentinelforge")
 OLLAMA_URL = os.getenv("OLLAMA_URL", "http://localhost:11434")
@@ -35,7 +34,7 @@ async def get_ollama_response(
 ) -> Dict[str, Any]:
     """
     Executes a structured cybersecurity analysis prompt against local Ollama LLM
-    or cloud API fallback (if GROQ_API_KEY is configured), persisting conversation entities.
+    or cloud API fallback (if GROQ_API_KEY is configured), persisting conversation documents to MongoDB.
     """
     start_time = time.time()
     iso_timestamp = datetime.now(timezone.utc).isoformat()
@@ -52,49 +51,52 @@ async def get_ollama_response(
             "error": "Empty prompt provided."
         }
 
-    db = SessionLocal()
+    # 1. Save user prompt & fetch conversation history from MongoDB
     try:
-        # 1. Save user prompt & fetch conversation history from Database
-        user_msg = ConversationRepository.add_message(db, cid, "user", prompt)
-        cid = user_msg.conversation_id
-        db_messages = ConversationRepository.get_messages(db, cid)
-        history_messages = [{"role": m.role, "content": m.content} for m in db_messages[:-1]]
+        user_msg = await MongoConversationRepository.add_message(cid, "user", prompt)
+        cid = user_msg["conversation_id"]
+        db_messages = await MongoConversationRepository.get_messages(cid)
+        history_messages = [{"role": m["role"], "content": m["content"]} for m in db_messages[:-1]]
+    except Exception as db_err:
+        logger.warning(f"MongoDB persistence unavailable ({db_err}). Proceeding in ephemeral mode.")
+        history_messages = []
 
-        # 2. Retrieve authoritative RAG security context
-        rag_result = rag_service.retrieve_context(prompt) if not override_context else {"context_text": override_context, "citations": []}
-        retrieved_context = rag_result.get("context_text", "")
+    # 2. Retrieve authoritative RAG security context
+    rag_result = rag_service.retrieve_context(prompt) if not override_context else {"context_text": override_context, "citations": []}
+    retrieved_context = rag_result.get("context_text", "")
 
-        # 3. Build complete cybersecurity prompt pipeline
-        system_prompt = get_security_system_prompt()
-        full_prompt = build_cybersecurity_prompt(
-            user_prompt=prompt,
-            history_messages=history_messages,
-            system_prompt=system_prompt,
-            retrieved_context=retrieved_context,
-            max_turns=6
-        )
+    # 3. Build complete cybersecurity prompt pipeline
+    system_prompt = get_security_system_prompt()
+    full_prompt = build_cybersecurity_prompt(
+        user_prompt=prompt,
+        history_messages=history_messages,
+        system_prompt=system_prompt,
+        retrieved_context=retrieved_context,
+        max_turns=6
+    )
 
-        reply = ""
+    reply = ""
 
-        # 4. Request completion from Cloud Groq API (if configured) or Local Ollama
-        if GROQ_API_KEY:
-            try:
-                res = requests.post(
-                    "https://api.groq.com/openai/v1/chat/completions",
-                    headers={"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"},
-                    json={
-                        "model": "llama-3.1-8b-instant",
-                        "messages": [{"role": "user", "content": full_prompt}],
-                        "max_tokens": 300,
-                    },
-                    timeout=30,
-                )
-                res.raise_for_status()
-                reply = res.json()["choices"][0]["message"]["content"]
-            except Exception as groq_err:
-                logger.warning(f"Groq API call failed: {groq_err}. Falling back to Ollama.")
+    # 4. Request completion from Cloud Groq API (if configured) or Local Ollama
+    if GROQ_API_KEY:
+        try:
+            res = requests.post(
+                "https://api.groq.com/openai/v1/chat/completions",
+                headers={"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"},
+                json={
+                    "model": "llama-3.1-8b-instant",
+                    "messages": [{"role": "user", "content": full_prompt}],
+                    "max_tokens": 300,
+                },
+                timeout=30,
+            )
+            res.raise_for_status()
+            reply = res.json()["choices"][0]["message"]["content"]
+        except Exception as groq_err:
+            logger.warning(f"Groq API call failed: {groq_err}. Falling back to Ollama.")
 
-        if not reply:
+    if not reply:
+        try:
             response = requests.post(
                 f"{OLLAMA_URL}/api/generate",
                 json={
@@ -108,44 +110,44 @@ async def get_ollama_response(
             response.raise_for_status()
             payload = response.json()
             reply = payload.get("response", "Unexpected response format returned from AI model engine.")
+        except requests.Timeout:
+            processing_time = round(time.time() - start_time, 3)
+            err_msg = "LLM Generation Timeout: Inference took longer than expected."
+            logger.error("LLM request timed out.")
+            return {
+                "success": False,
+                "response": err_msg,
+                "conversation_id": cid,
+                "timestamp": iso_timestamp,
+                "processing_time": processing_time,
+                "error": "Request timeout"
+            }
+        except requests.RequestException as e:
+            processing_time = round(time.time() - start_time, 3)
+            err_msg = f"LLM Connection Error: Unable to connect to inference engine ({OLLAMA_URL}). Ensure model engine is running."
+            logger.error(f"LLM connection error: {e}")
+            return {
+                "success": False,
+                "response": err_msg,
+                "conversation_id": cid,
+                "timestamp": iso_timestamp,
+                "processing_time": processing_time,
+                "error": str(e)
+            }
 
-        # 5. Save assistant response to Database
-        ConversationRepository.add_message(db, cid, "assistant", reply)
+    # 5. Save assistant response to MongoDB
+    try:
+        await MongoConversationRepository.add_message(cid, "assistant", reply)
+    except Exception as db_err:
+        logger.warning(f"Failed to save assistant response to MongoDB: {db_err}")
 
-        processing_time = round(time.time() - start_time, 3)
-        return {
-            "success": True,
-            "response": reply,
-            "conversation_id": cid,
-            "timestamp": iso_timestamp,
-            "processing_time": processing_time,
-            "citations": rag_result.get("citations", []),
-            "error": None
-        }
-
-    except requests.Timeout:
-        processing_time = round(time.time() - start_time, 3)
-        err_msg = "LLM Generation Timeout: Inference took longer than expected."
-        logger.error("LLM request timed out.")
-        return {
-            "success": False,
-            "response": err_msg,
-            "conversation_id": cid,
-            "timestamp": iso_timestamp,
-            "processing_time": processing_time,
-            "error": "Request timeout"
-        }
-    except requests.RequestException as e:
-        processing_time = round(time.time() - start_time, 3)
-        err_msg = f"LLM Connection Error: Unable to connect to inference engine ({OLLAMA_URL}). Ensure model engine is running."
-        logger.error(f"LLM connection error: {e}")
-        return {
-            "success": False,
-            "response": err_msg,
-            "conversation_id": cid,
-            "timestamp": iso_timestamp,
-            "processing_time": processing_time,
-            "error": str(e)
-        }
-    finally:
-        db.close()
+    processing_time = round(time.time() - start_time, 3)
+    return {
+        "success": True,
+        "response": reply,
+        "conversation_id": cid,
+        "timestamp": iso_timestamp,
+        "processing_time": processing_time,
+        "citations": rag_result.get("citations", []),
+        "error": None
+    }

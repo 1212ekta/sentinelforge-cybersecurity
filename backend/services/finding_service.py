@@ -1,11 +1,9 @@
 import uuid
 from datetime import datetime, timezone
 from typing import Dict, Optional, List
-from sqlalchemy.orm import Session
 from models import AnalysisResponse, SecurityFinding, FindingStatistics, SeverityEnum, ConfidenceEnum, ReportResponse
-from db.database import SessionLocal
-from db.repositories.analysis_repository import AnalysisRepository
-from db.repositories.report_repository import ReportRepository
+from repositories.analysis_repository import MongoAnalysisRepository
+from repositories.report_repository import MongoReportRepository
 
 def compute_statistics(findings: List[SecurityFinding]) -> FindingStatistics:
     stats = FindingStatistics()
@@ -34,65 +32,59 @@ def compute_overall_risk(stats: FindingStatistics) -> SeverityEnum:
         return SeverityEnum.LOW
     return SeverityEnum.INFO
 
-def get_analysis_result(analysis_id: str) -> Optional[AnalysisResponse]:
-    db = SessionLocal()
-    try:
-        model = AnalysisRepository.get_analysis(db, analysis_id)
-        if not model:
-            return None
+async def get_analysis_result(analysis_id: str) -> Optional[AnalysisResponse]:
+    model = await MongoAnalysisRepository.get_analysis(analysis_id)
+    if not model:
+        return None
 
-        findings = [
-            SecurityFinding(
-                id=f.id,
-                title=f.title,
-                severity=SeverityEnum(f.severity),
-                category=f.category,
-                description=f.description,
-                evidence=f.evidence,
-                impact=f.impact,
-                recommendation=f.recommendation,
-                confidence=ConfidenceEnum(f.confidence),
-                source_file=f.source_file,
-                line_number=f.line_number,
-                cwe_id=f.cwe_id,
-                cve_id=f.cve_id,
-                created_at=f.created_at.isoformat() if hasattr(f.created_at, 'isoformat') else str(f.created_at)
-            )
-            for f in model.findings
-        ]
-
-        stats = compute_statistics(findings)
-
-        return AnalysisResponse(
-            success=True,
-            analysis_id=model.id,
-            summary=model.summary,
-            risk_level=SeverityEnum(model.risk_level),
-            findings=findings,
-            statistics=stats,
-            files_analyzed=[model.filename],
-            processing_time=model.processing_time,
-            created_at=model.created_at.isoformat() if hasattr(model.created_at, 'isoformat') else str(model.created_at)
+    findings = [
+        SecurityFinding(
+            id=f["id"],
+            title=f["title"],
+            severity=SeverityEnum(f["severity"]),
+            category=f["category"],
+            description=f["description"],
+            evidence=f["evidence"],
+            impact=f["impact"],
+            recommendation=f["recommendation"],
+            confidence=ConfidenceEnum(f.get("confidence", "HIGH")),
+            source_file=f["source_file"],
+            line_number=f.get("line_number"),
+            cwe_id=f.get("cwe_id"),
+            cve_id=f.get("cve_id"),
+            created_at=str(f.get("created_at"))
         )
-    finally:
-        db.close()
+        for f in model.get("findings", [])
+    ]
 
-def generate_markdown_report(analysis: AnalysisResponse) -> ReportResponse:
-    db = SessionLocal()
-    try:
-        existing_rpt = ReportRepository.get_report_by_analysis(db, analysis.analysis_id)
-        if existing_rpt:
-            return ReportResponse(
-                analysis_id=analysis.analysis_id,
-                title=existing_rpt.title,
-                markdown_content=existing_rpt.content,
-                generated_at=existing_rpt.created_at.isoformat() if hasattr(existing_rpt.created_at, 'isoformat') else str(existing_rpt.created_at)
-            )
+    stats = compute_statistics(findings)
 
-        now_str = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
-        stats = analysis.statistics
+    return AnalysisResponse(
+        success=True,
+        analysis_id=model["id"],
+        summary=model["summary"],
+        risk_level=SeverityEnum(model["risk_level"]),
+        findings=findings,
+        statistics=stats,
+        files_analyzed=[model["filename"]],
+        processing_time=model.get("processing_time", 0.0),
+        created_at=str(model.get("created_at"))
+    )
 
-        md = f"""# SENTINELFORGE
+async def generate_markdown_report(analysis: AnalysisResponse) -> ReportResponse:
+    existing_rpt = await MongoReportRepository.get_report_by_analysis(analysis.analysis_id)
+    if existing_rpt:
+        return ReportResponse(
+            analysis_id=analysis.analysis_id,
+            title=existing_rpt["title"],
+            markdown_content=existing_rpt["content"],
+            generated_at=str(existing_rpt.get("created_at"))
+        )
+
+    now_str = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+    stats = analysis.statistics
+
+    md = f"""# SENTINELFORGE
 ## Executive Security Assessment Report
 
 **Report ID:** `{analysis.analysis_id}`  
@@ -123,11 +115,11 @@ def generate_markdown_report(analysis: AnalysisResponse) -> ReportResponse:
 
 """
 
-        if not analysis.findings:
-            md += "*No security vulnerabilities or anomalies were identified in the analyzed target.*\n"
-        else:
-            for idx, f in enumerate(analysis.findings, 1):
-                md += f"""#### [{f.severity.value}] Finding {idx}: {f.title}
+    if not analysis.findings:
+        md += "*No security vulnerabilities or anomalies were identified in the analyzed target.*\n"
+    else:
+        for idx, f in enumerate(analysis.findings, 1):
+            md += f"""#### [{f.severity.value}] Finding {idx}: {f.title}
 - **Category:** {f.category}
 - **Confidence:** {f.confidence.value}
 - **Source File:** `{f.source_file}`{" (Line " + str(f.line_number) + ")" if f.line_number else ""}
@@ -151,19 +143,17 @@ def generate_markdown_report(analysis: AnalysisResponse) -> ReportResponse:
 
 """
 
-        md += """### 5. Conclusion & Recommendations
+    md += """### 5. Conclusion & Recommendations
 Perform immediate remediation for Critical and High severity findings. Integrate automated SAST/DAST checks into CI/CD pipelines to prevent reintroduction of reported flaws.
 """
 
-        rpt_id = f"rpt_{uuid.uuid4().hex[:8]}"
-        rpt_title = f"SentinelForge Security Report - {analysis.analysis_id}"
-        ReportRepository.save_report(db, rpt_id, analysis.analysis_id, rpt_title, md, "markdown")
+    rpt_id = f"rpt_{uuid.uuid4().hex[:8]}"
+    rpt_title = f"SentinelForge Security Report - {analysis.analysis_id}"
+    await MongoReportRepository.save_report(rpt_id, analysis.analysis_id, rpt_title, md, "markdown")
 
-        return ReportResponse(
-            analysis_id=analysis.analysis_id,
-            title=rpt_title,
-            markdown_content=md,
-            generated_at=now_str
-        )
-    finally:
-        db.close()
+    return ReportResponse(
+        analysis_id=analysis.analysis_id,
+        title=rpt_title,
+        markdown_content=md,
+        generated_at=now_str
+    )

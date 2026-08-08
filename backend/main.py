@@ -9,16 +9,18 @@ try:
     from routes.chat import router as chat_router
     from routes.analysis import router as analysis_router
     from routes.conversations import router as conversations_router
-    from db.database import init_db
+    from database import init_mongo_db
 except (ImportError, ModuleNotFoundError):
     from .routes.chat import router as chat_router
     from .routes.analysis import router as analysis_router
     from .routes.conversations import router as conversations_router
-    from .db.database import init_db
-
-init_db()  # Initialize database tables on startup
+    from .database import init_mongo_db
 
 app = FastAPI(title="SentinelForge API")
+
+@app.on_event("startup")
+async def on_startup():
+    await init_mongo_db()
 
 raw_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:5173,http://127.0.0.1:3000")
 allowed_origins = [origin.strip() for origin in raw_origins.split(",") if origin.strip()]

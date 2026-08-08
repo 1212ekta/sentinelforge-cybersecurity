@@ -106,29 +106,28 @@ export function useChatHistory() {
 
   const selectConversation = useCallback(
     async (id: string) => {
-      if (conversations.some((c) => c.id === id)) {
-        setActiveId(id);
-        // Load messages from backend for selected conversation
-        try {
-          const res = await fetch(`${API_BASE}/conversations/${id}/messages`);
-          if (!res.ok) return;
-          const msgs: Array<{ id: string; role: 'user' | 'assistant' | 'system'; content: string; created_at: string }> = await res.json();
-          const chatMsgs: ChatMessage[] = msgs.map((m) => ({
-            id: m.id,
-            role: m.role,
-            content: m.content,
-            createdAt: new Date(m.created_at).getTime(),
-            status: 'complete',
-          }));
-          setConversations((prev) =>
-            prev.map((c) => (c.id === id ? { ...c, messages: chatMsgs } : c))
-          );
-        } catch {
-          // Ignore
-        }
+      setActiveId(id);
+
+      // Load messages from backend for selected conversation
+      try {
+        const res = await fetch(`${API_BASE}/conversations/${id}/messages`);
+        if (!res.ok) return;
+        const msgs: Array<{ id: string; role: 'user' | 'assistant' | 'system'; content: string; created_at: string }> = await res.json();
+        const chatMsgs: ChatMessage[] = msgs.map((m) => ({
+          id: m.id,
+          role: m.role,
+          content: m.content,
+          createdAt: new Date(m.created_at).getTime(),
+          status: 'complete',
+        }));
+        setConversations((prev) =>
+          prev.map((c) => (c.id === id ? { ...c, messages: chatMsgs } : c))
+        );
+      } catch {
+        // Ignore
       }
     },
-    [conversations, setActiveId, setConversations]
+    [setActiveId, setConversations]
   );
 
   const deleteConversation = useCallback(

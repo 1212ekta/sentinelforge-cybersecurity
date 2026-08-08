@@ -24,7 +24,7 @@ function getErrorMessage(err: unknown): string {
       case "timeout":
         return "Request timed out. The backend server took too long to respond.";
       case "network":
-        return "Could not connect to backend server. Please verify FastAPI is running at http://localhost:8000.";
+        return "Could not connect to backend server. Please verify backend is running.";
       case "parse":
         return "Received an invalid response format from the server.";
       case "http":
@@ -46,13 +46,10 @@ export function useChat(opts?: UseChatOptions) {
   const currentAssistantIdRef = React.useRef<string | null>(null);
   const abortControllerRef = React.useRef<AbortController | null>(null);
 
-  const initialRef = React.useRef(initialMessages);
+  // Re-sync messages state whenever conversationId or initialMessages changes
   React.useEffect(() => {
-    if (initialMessages !== initialRef.current) {
-      initialRef.current = initialMessages;
-      setMessages(initialMessages);
-    }
-  }, [initialMessages]);
+    setMessages(initialMessages);
+  }, [conversationId, initialMessages]);
 
   const setAndNotify = React.useCallback(
     (updater: ChatMessage[] | ((prev: ChatMessage[]) => ChatMessage[])) => {

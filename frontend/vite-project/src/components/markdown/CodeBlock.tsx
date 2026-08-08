@@ -1,9 +1,7 @@
-'use client';
-
 import { useCallback } from 'react';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark, oneLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import { useTheme } from 'next-themes';
+import { useTheme } from '@/hooks/useTheme';
 import { Check, Copy } from 'lucide-react';
 import { IconButton } from '@/components/ui/IconButton';
 import { useCopyToClipboard } from '@/hooks/useCopyToClipboard';
@@ -21,9 +19,9 @@ interface CodeBlockProps {
 }
 
 export function CodeBlock({ language, code, actions = [] }: CodeBlockProps) {
-  const { resolvedTheme } = useTheme();
+  const { theme } = useTheme();
   const { copied, copy } = useCopyToClipboard();
-  const isDark = resolvedTheme !== 'light';
+  const isDark = theme !== 'light';
 
   const handleCopy = useCallback(() => copy(code), [code, copy]);
 

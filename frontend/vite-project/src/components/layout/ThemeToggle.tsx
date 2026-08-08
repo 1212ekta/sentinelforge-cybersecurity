@@ -1,19 +1,16 @@
-'use client';
-
 import { useEffect, useState } from 'react';
 import { Moon, Sun } from 'lucide-react';
-import { useTheme } from 'next-themes';
+import { useTheme } from '@/hooks/useTheme';
 import { IconButton } from '@/components/ui/IconButton';
 
 export function ThemeToggle() {
-  const { resolvedTheme, setTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
-  // Avoid hydration mismatch: don't render theme-dependent icon until mounted
   useEffect(() => setMounted(true), []);
   if (!mounted) return <div className="h-9 w-9" />;
 
-  const isDark = resolvedTheme === 'dark';
+  const isDark = theme === 'dark';
 
   return (
     <IconButton

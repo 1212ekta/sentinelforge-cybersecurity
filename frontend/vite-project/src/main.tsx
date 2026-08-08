@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
 import { AppShell } from '@/components/layout/AppShell';
+import { ChatHistoryProvider } from '@/features/chat/context/ChatHistoryContext';
 import ChatPage from '@/app/chat/page';
 import FileAnalysisPage from '@/app/file-analysis/page';
 import LogAnalysisPage from '@/app/log-analysis/page';
@@ -47,7 +48,11 @@ function MainApp() {
     pageContent = <SettingsPage />;
   }
 
-  return <AppShell>{pageContent}</AppShell>;
+  return (
+    <ChatHistoryProvider>
+      <AppShell>{pageContent}</AppShell>
+    </ChatHistoryProvider>
+  );
 }
 
 ReactDOM.createRoot(document.getElementById('root')!).render(

@@ -1,7 +1,4 @@
-'use client';
-
-import { useEffect } from 'react';
-import { usePathname } from 'next/navigation';
+import { useState, useEffect } from 'react';
 import { X, ShieldHalf } from 'lucide-react';
 import { NAV_ITEMS } from '@/lib/navigation';
 import { SidebarNavItem } from './SidebarNavItem';
@@ -15,9 +12,20 @@ interface MobileNavProps {
 }
 
 export function MobileNav({ open, onClose }: MobileNavProps) {
-  const pathname = usePathname();
+  const [pathname, setPathname] = useState(() => (typeof window !== 'undefined' ? window.location.pathname : '/chat'));
   const isDesktop = useMediaQuery('(min-width: 768px)');
-  const isChatRoute = pathname === '/chat' || pathname?.startsWith('/chat');
+
+  useEffect(() => {
+    const handleNav = () => setPathname(window.location.pathname);
+    window.addEventListener('popstate', handleNav);
+    window.addEventListener('navigate' as any, handleNav);
+    return () => {
+      window.removeEventListener('popstate', handleNav);
+      window.removeEventListener('navigate' as any, handleNav);
+    };
+  }, []);
+
+  const isChatRoute = pathname === '/' || pathname === '/chat' || pathname?.startsWith('/chat');
 
   useEffect(() => {
     if (isDesktop && open) {

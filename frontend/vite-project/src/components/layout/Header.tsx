@@ -1,7 +1,5 @@
-'use client';
-
+import { useState, useEffect } from 'react';
 import { Menu } from 'lucide-react';
-import { usePathname } from 'next/navigation';
 import { IconButton } from '@/components/ui/IconButton';
 import { ThemeToggle } from './ThemeToggle';
 import { NAV_ITEMS } from '@/lib/navigation';
@@ -11,9 +9,20 @@ interface HeaderProps {
 }
 
 export function Header({ onOpenMobileNav }: HeaderProps) {
-  const pathname = usePathname();
+  const [pathname, setPathname] = useState(() => (typeof window !== 'undefined' ? window.location.pathname : '/chat'));
+
+  useEffect(() => {
+    const handleNav = () => setPathname(window.location.pathname);
+    window.addEventListener('popstate', handleNav);
+    window.addEventListener('navigate' as any, handleNav);
+    return () => {
+      window.removeEventListener('popstate', handleNav);
+      window.removeEventListener('navigate' as any, handleNav);
+    };
+  }, []);
+
   const activeItem = NAV_ITEMS.find(
-    (item) => pathname === item.href || pathname?.startsWith(`${item.href}/`)
+    (item) => pathname === item.href || (item.href !== '/' && pathname.startsWith(`${item.href}`))
   );
 
   return (

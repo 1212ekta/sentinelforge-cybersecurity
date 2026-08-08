@@ -7,8 +7,20 @@ load_dotenv()
 
 logger = logging.getLogger("sentinelforge")
 
-MONGODB_URL = os.getenv("MONGODB_URL", "mongodb://localhost:27017")
-client = AsyncIOMotorClient(MONGODB_URL)
+raw_url = os.getenv("MONGODB_URL", "mongodb://localhost:27017").strip()
+if raw_url.startswith("MONGODB_URL="):
+    raw_url = raw_url.replace("MONGODB_URL=", "", 1).strip()
+
+if not (raw_url.startswith("mongodb://") or raw_url.startswith("mongodb+srv://")):
+    raw_url = "mongodb://localhost:27017"
+
+MONGODB_URL = raw_url
+
+try:
+    client = AsyncIOMotorClient(MONGODB_URL, serverSelectionTimeoutMS=5000)
+except Exception as e:
+    logger.warning(f"Invalid MONGODB_URL format ({e}). Using local fallback.")
+    client = AsyncIOMotorClient("mongodb://localhost:27017", serverSelectionTimeoutMS=5000)
 
 # Select 'sentinelforge' database
 db = client.sentinelforge

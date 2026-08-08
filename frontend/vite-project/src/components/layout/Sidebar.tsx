@@ -1,6 +1,4 @@
-'use client';
-
-import { usePathname } from 'next/navigation';
+import { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, ShieldHalf } from 'lucide-react';
 import { NAV_ITEMS } from '@/lib/navigation';
 import { SidebarNavItem } from './SidebarNavItem';
@@ -14,8 +12,19 @@ interface SidebarProps {
 }
 
 export function Sidebar({ collapsed, onToggle }: SidebarProps) {
-  const pathname = usePathname();
-  const isChatRoute = pathname === '/chat' || pathname?.startsWith('/chat');
+  const [pathname, setPathname] = useState(() => (typeof window !== 'undefined' ? window.location.pathname : '/chat'));
+
+  useEffect(() => {
+    const handleNav = () => setPathname(window.location.pathname);
+    window.addEventListener('popstate', handleNav);
+    window.addEventListener('navigate' as any, handleNav);
+    return () => {
+      window.removeEventListener('popstate', handleNav);
+      window.removeEventListener('navigate' as any, handleNav);
+    };
+  }, []);
+
+  const isChatRoute = pathname === '/' || pathname === '/chat' || pathname?.startsWith('/chat');
 
   return (
     <aside

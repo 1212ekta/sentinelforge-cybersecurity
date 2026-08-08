@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, ShieldHalf } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { NAV_ITEMS } from '@/lib/navigation';
 import { SidebarNavItem } from './SidebarNavItem';
 import { IconButton } from '@/components/ui/IconButton';
@@ -26,6 +26,14 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
 
   const isChatRoute = pathname === '/' || pathname === '/chat' || pathname?.startsWith('/chat');
 
+  const handleBrandClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    if (window.location.pathname !== '/chat') {
+      window.history.pushState({}, '', '/chat');
+      window.dispatchEvent(new CustomEvent('navigate', { detail: '/chat' }));
+    }
+  };
+
   return (
     <aside
       className={cn(
@@ -34,12 +42,23 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
       )}
     >
       <div className="flex h-14 items-center gap-2 border-b border-border px-3">
-        <ShieldHalf size={22} className="shrink-0 text-primary" />
-        {!collapsed && (
-          <span className="truncate font-semibold text-sidebar-foreground">
-            SentinelForge
-          </span>
-        )}
+        <a
+          href="/chat"
+          onClick={handleBrandClick}
+          className="flex items-center gap-2 overflow-hidden hover:opacity-90 transition-opacity cursor-pointer focus:outline-none"
+          title="SentinelForge - Home"
+        >
+          <img
+            src="/logo.png"
+            alt="SentinelForge Logo"
+            className="h-8 w-8 object-contain rounded-md shrink-0"
+          />
+          {!collapsed && (
+            <span className="truncate font-semibold text-sidebar-foreground">
+              SentinelForge
+            </span>
+          )}
+        </a>
       </div>
 
       <nav className="flex-1 overflow-y-auto p-2">

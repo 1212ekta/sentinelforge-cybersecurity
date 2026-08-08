@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, ShieldHalf } from 'lucide-react';
+import { X } from 'lucide-react';
 import { NAV_ITEMS } from '@/lib/navigation';
 import { SidebarNavItem } from './SidebarNavItem';
 import { IconButton } from '@/components/ui/IconButton';
@@ -35,6 +35,15 @@ export function MobileNav({ open, onClose }: MobileNavProps) {
 
   if (!open) return null;
 
+  const handleBrandClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    onClose();
+    if (window.location.pathname !== '/chat') {
+      window.history.pushState({}, '', '/chat');
+      window.dispatchEvent(new CustomEvent('navigate', { detail: '/chat' }));
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 md:hidden">
       <div
@@ -44,12 +53,21 @@ export function MobileNav({ open, onClose }: MobileNavProps) {
       />
       <div className="absolute inset-y-0 left-0 flex w-72 max-w-[80vw] flex-col bg-sidebar shadow-2xl animate-slide-in-left motion-reduce:animate-none">
         <div className="flex h-14 items-center justify-between border-b border-border px-3 shrink-0">
-          <div className="flex items-center gap-2">
-            <ShieldHalf size={22} className="text-primary shrink-0" />
+          <a
+            href="/chat"
+            onClick={handleBrandClick}
+            className="flex items-center gap-2 overflow-hidden hover:opacity-90 transition-opacity cursor-pointer focus:outline-none"
+            title="SentinelForge - Home"
+          >
+            <img
+              src="/logo.png"
+              alt="SentinelForge Logo"
+              className="h-8 w-8 object-contain rounded-md shrink-0"
+            />
             <span className="font-semibold text-sidebar-foreground truncate">
               SentinelForge
             </span>
-          </div>
+          </a>
           <IconButton aria-label="Close menu" onClick={onClose} className="h-10 w-10">
             <X size={20} />
           </IconButton>

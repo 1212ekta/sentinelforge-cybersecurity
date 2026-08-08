@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Menu } from 'lucide-react';
+import { NAV_ITEMS } from '@/lib/navigation';
 import { IconButton } from '@/components/ui/IconButton';
 import { ThemeToggle } from './ThemeToggle';
-import { NAV_ITEMS } from '@/lib/navigation';
 
 interface HeaderProps {
   onOpenMobileNav: () => void;
@@ -21,25 +21,53 @@ export function Header({ onOpenMobileNav }: HeaderProps) {
     };
   }, []);
 
-  const activeItem = NAV_ITEMS.find(
-    (item) => pathname === item.href || (item.href !== '/' && pathname.startsWith(`${item.href}`))
+  const activeItem = NAV_ITEMS.find((item) =>
+    item.href === '/chat'
+      ? pathname === '/' || pathname === '/chat' || pathname?.startsWith('/chat')
+      : pathname?.startsWith(item.href)
   );
 
+  const title = activeItem?.label ?? 'SentinelForge';
+
+  const handleBrandClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    if (window.location.pathname !== '/chat') {
+      window.history.pushState({}, '', '/chat');
+      window.dispatchEvent(new CustomEvent('navigate', { detail: '/chat' }));
+    }
+  };
+
   return (
-    <header className="flex h-14 shrink-0 items-center justify-between border-b border-border bg-background px-4">
-      <div className="flex items-center gap-3">
+    <header className="flex h-14 items-center justify-between border-b border-border bg-background px-4 shrink-0">
+      <div className="flex items-center gap-3 min-w-0">
         <IconButton
           aria-label="Open menu"
           onClick={onOpenMobileNav}
           className="md:hidden"
         >
-          <Menu size={18} />
+          <Menu size={20} />
         </IconButton>
-        <h1 className="text-sm font-medium text-foreground">
-          {activeItem?.label ?? 'SentinelForge'}
-        </h1>
+
+        <a
+          href="/chat"
+          onClick={handleBrandClick}
+          className="flex items-center gap-2 overflow-hidden hover:opacity-90 transition-opacity cursor-pointer focus:outline-none"
+          title="SentinelForge - Home"
+        >
+          <img
+            src="/logo.png"
+            alt="SentinelForge Logo"
+            className="h-7 w-7 object-contain rounded shrink-0"
+          />
+          <span className="font-semibold text-foreground text-sm sm:text-base truncate">
+            {title}
+          </span>
+        </a>
       </div>
-      <ThemeToggle />
+
+      <div className="flex items-center gap-2 shrink-0">
+        <ThemeToggle />
+      </div>
     </header>
   );
 }

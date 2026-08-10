@@ -49,17 +49,18 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
           title="SentinelForge - Home"
         >
           <img
-            src="/logo.png"
-            alt="SentinelForge Logo"
-            className="h-8 w-8 object-contain rounded-md shrink-0"
+            src="/sentinelforge-icon.png"
+            alt="SentinelForge Shield Icon"
+            className="h-8 w-8 object-contain rounded-lg shrink-0 shadow-xs"
           />
           {!collapsed && (
-            <span className="truncate font-semibold text-sidebar-foreground">
+            <span className="truncate font-extrabold text-foreground text-sm tracking-tight font-mono">
               SentinelForge
             </span>
           )}
         </a>
       </div>
+
 
       <nav className="flex-1 overflow-y-auto p-2">
         <div className="space-y-1">

@@ -62,13 +62,14 @@ export function WelcomeScreen({ onStart }: WelcomeScreenProps) {
       <header className="relative z-10 flex items-center justify-between max-w-7xl w-full mx-auto pb-4 shrink-0 border-b border-slate-800/80">
         <div className="flex items-center gap-2.5">
           <img
-            src="/logo.png"
-            alt="SentinelForge Logo"
-            className="h-8 w-8 object-contain rounded-md shrink-0 shadow-xs"
+            src="/sentinelforge-icon.png"
+            alt="SentinelForge Shield Icon"
+            className="h-8 w-8 object-contain rounded-lg shrink-0 shadow-xs"
           />
-          <span className="font-bold text-white text-sm sm:text-base tracking-tight font-mono">
+          <span className="font-extrabold text-white text-sm sm:text-base tracking-tight font-mono">
             SentinelForge
           </span>
+
         </div>
 
         <ThemeToggle />

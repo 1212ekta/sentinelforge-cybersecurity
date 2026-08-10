@@ -60,14 +60,15 @@ export function MobileNav({ open, onClose }: MobileNavProps) {
             title="SentinelForge - Home"
           >
             <img
-              src="/logo.png"
-              alt="SentinelForge Logo"
-              className="h-8 w-8 object-contain rounded-md shrink-0"
+              src="/sentinelforge-icon.png"
+              alt="SentinelForge Shield Icon"
+              className="h-8 w-8 object-contain rounded-lg shrink-0 shadow-xs"
             />
-            <span className="font-semibold text-sidebar-foreground truncate">
+            <span className="font-extrabold text-foreground text-sm tracking-tight font-mono truncate">
               SentinelForge
             </span>
           </a>
+
           <IconButton aria-label="Close menu" onClick={onClose} className="h-10 w-10">
             <X size={20} />
           </IconButton>

@@ -80,10 +80,11 @@ export function Header({ onOpenMobileNav }: HeaderProps) {
           title="SentinelForge - Home"
         >
           <img
-            src="/logo.png"
-            alt="SentinelForge Logo"
-            className="h-6 w-6 sm:h-7 sm:w-7 object-contain rounded shrink-0"
+            src="/sentinelforge-icon.png"
+            alt="SentinelForge Shield Icon"
+            className="h-6 w-6 sm:h-7 sm:w-7 object-contain rounded-md shrink-0 shadow-2xs"
           />
+
           <div className="flex flex-col min-w-0">
             <span className="font-semibold text-foreground text-xs sm:text-sm truncate leading-tight">
               {title}

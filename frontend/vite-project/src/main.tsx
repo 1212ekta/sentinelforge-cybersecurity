@@ -13,12 +13,15 @@ import '@/app/globals.css';
 import '@/style.css';
 
 function MainApp() {
-  const [currentPath, setCurrentPath] = useState(window.location.pathname);
   const [hasVisited, setHasVisited] = useState<boolean>(() => {
     if (typeof window === 'undefined') return true;
-    if (window.location.pathname === '/welcome') return false;
-    return localStorage.getItem('sf_welcome_completed') === 'true';
+    const path = window.location.pathname;
+    if (path === '/' || path === '/welcome' || path === '') return false;
+    return false;
   });
+  const [currentPath, setCurrentPath] = useState(() => (typeof window !== 'undefined' ? window.location.pathname : '/'));
+
+
 
   useEffect(() => {
     const handlePopState = () => {

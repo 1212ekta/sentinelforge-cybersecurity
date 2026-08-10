@@ -21,9 +21,12 @@ export function ChatHistoryPanel({ collapsed }: ChatHistoryPanelProps) {
     renameConversation,
     duplicateConversation,
     exportConversation,
+    clearAllGuestConversations,
   } = useChatHistory();
 
   const [searchQuery, setSearchQuery] = useState('');
+  const [showClearModal, setShowClearModal] = useState(false);
+
 
   const filteredConversations = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
@@ -108,6 +111,46 @@ export function ChatHistoryPanel({ collapsed }: ChatHistoryPanelProps) {
           ))
         )}
       </div>
+
+      {!collapsed && conversations.length > 0 && (
+        <div className="px-2 pt-2 border-t border-border/60">
+          <button
+            onClick={() => setShowClearModal(true)}
+            className="flex items-center justify-center gap-1.5 w-full py-1.5 px-2 rounded-md text-[11px] font-medium text-muted-foreground hover:text-danger hover:bg-danger/10 transition-colors cursor-pointer"
+          >
+            <span>Clear Chat History</span>
+          </button>
+        </div>
+      )}
+
+      {showClearModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4">
+          <div className="w-full max-w-xs rounded-xl border border-border bg-card p-5 shadow-2xl flex flex-col gap-4 text-left animate-message-enter">
+            <h3 className="font-bold text-sm text-foreground">Clear Chat History</h3>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Clear all chat history for this browser?
+            </p>
+            <div className="flex items-center justify-end gap-2 pt-1">
+              <button
+                onClick={() => setShowClearModal(false)}
+                className="px-3 py-1.5 rounded-lg border border-border bg-muted/50 text-xs font-medium text-foreground hover:bg-muted transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={async () => {
+                  await clearAllGuestConversations();
+                  setShowClearModal(false);
+                }}
+                className="px-3 py-1.5 rounded-lg bg-danger text-white text-xs font-semibold hover:bg-danger/90 transition-colors shadow-2xs cursor-pointer"
+              >
+                Clear History
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+

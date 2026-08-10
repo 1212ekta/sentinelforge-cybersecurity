@@ -113,7 +113,12 @@ export function WelcomeScreen({ onStart }: WelcomeScreenProps) {
             <span className="text-xs text-slate-400 font-mono tracking-wide pl-1">
               Secure. Analyze. Understand.
             </span>
+
+            <span className="text-[11px] text-slate-400/90 font-sans pl-1">
+              Guest mode — your chats are saved for this browser.
+            </span>
           </div>
+
         </div>
 
         {/* Right Column (~58% width) - Interactive 3D Parallax Visual */}

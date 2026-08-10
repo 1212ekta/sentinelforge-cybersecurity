@@ -1,5 +1,5 @@
 from typing import List, Optional
-from fastapi import APIRouter, HTTPException, Body
+from fastapi import APIRouter, HTTPException, Body, Header
 from pydantic import BaseModel
 
 try:
@@ -29,8 +29,12 @@ class ConversationSchema(BaseModel):
     updated_at: str
 
 @router.post("", response_model=ConversationSchema)
-async def create_conversation(req: CreateConversationRequest = Body(...)):
-    conv = await MongoConversationRepository.create_conversation(title=req.title or "New Chat")
+async def create_conversation(
+    req: CreateConversationRequest = Body(...),
+    x_guest_id: Optional[str] = Header(None, alias="X-Guest-ID")
+):
+    guest_id = x_guest_id or "default_guest"
+    conv = await MongoConversationRepository.create_conversation(title=req.title or "New Chat", guest_id=guest_id)
     return ConversationSchema(
         id=conv["id"],
         title=conv["title"],
@@ -39,8 +43,11 @@ async def create_conversation(req: CreateConversationRequest = Body(...)):
     )
 
 @router.get("", response_model=List[ConversationSchema])
-async def list_conversations():
-    convs = await MongoConversationRepository.list_conversations()
+async def list_conversations(
+    x_guest_id: Optional[str] = Header(None, alias="X-Guest-ID")
+):
+    guest_id = x_guest_id or "default_guest"
+    convs = await MongoConversationRepository.list_conversations(guest_id=guest_id)
     return [
         ConversationSchema(
             id=c["id"],
@@ -51,9 +58,21 @@ async def list_conversations():
         for c in convs
     ]
 
+@router.delete("/clear/all")
+async def clear_all_conversations(
+    x_guest_id: Optional[str] = Header(None, alias="X-Guest-ID")
+):
+    guest_id = x_guest_id or "default_guest"
+    count = await MongoConversationRepository.clear_guest_conversations(guest_id=guest_id)
+    return {"success": True, "message": f"Cleared {count} conversations for guest.", "deleted_count": count}
+
 @router.get("/{conversation_id}", response_model=ConversationSchema)
-async def get_conversation(conversation_id: str):
-    conv = await MongoConversationRepository.get_conversation(conversation_id)
+async def get_conversation(
+    conversation_id: str,
+    x_guest_id: Optional[str] = Header(None, alias="X-Guest-ID")
+):
+    guest_id = x_guest_id or "default_guest"
+    conv = await MongoConversationRepository.get_conversation(conversation_id, guest_id=guest_id)
     if not conv:
         raise HTTPException(status_code=404, detail="Conversation not found")
     return ConversationSchema(
@@ -64,8 +83,13 @@ async def get_conversation(conversation_id: str):
     )
 
 @router.patch("/{conversation_id}", response_model=ConversationSchema)
-async def update_conversation(conversation_id: str, req: UpdateConversationRequest = Body(...)):
-    conv = await MongoConversationRepository.update_title(conversation_id, req.title)
+async def update_conversation(
+    conversation_id: str,
+    req: UpdateConversationRequest = Body(...),
+    x_guest_id: Optional[str] = Header(None, alias="X-Guest-ID")
+):
+    guest_id = x_guest_id or "default_guest"
+    conv = await MongoConversationRepository.update_title(conversation_id, req.title, guest_id=guest_id)
     if not conv:
         raise HTTPException(status_code=404, detail="Conversation not found")
     return ConversationSchema(
@@ -76,18 +100,26 @@ async def update_conversation(conversation_id: str, req: UpdateConversationReque
     )
 
 @router.delete("/{conversation_id}")
-async def delete_conversation(conversation_id: str):
-    success = await MongoConversationRepository.delete_conversation(conversation_id)
+async def delete_conversation(
+    conversation_id: str,
+    x_guest_id: Optional[str] = Header(None, alias="X-Guest-ID")
+):
+    guest_id = x_guest_id or "default_guest"
+    success = await MongoConversationRepository.delete_conversation(conversation_id, guest_id=guest_id)
     if not success:
         raise HTTPException(status_code=404, detail="Conversation not found")
     return {"success": True, "message": "Conversation deleted successfully"}
 
 @router.get("/{conversation_id}/messages", response_model=List[MessageSchema])
-async def get_conversation_messages(conversation_id: str):
-    conv = await MongoConversationRepository.get_conversation(conversation_id)
+async def get_conversation_messages(
+    conversation_id: str,
+    x_guest_id: Optional[str] = Header(None, alias="X-Guest-ID")
+):
+    guest_id = x_guest_id or "default_guest"
+    conv = await MongoConversationRepository.get_conversation(conversation_id, guest_id=guest_id)
     if not conv:
         raise HTTPException(status_code=404, detail="Conversation not found")
-    msgs = await MongoConversationRepository.get_messages(conversation_id)
+    msgs = await MongoConversationRepository.get_messages(conversation_id, guest_id=guest_id)
     return [
         MessageSchema(
             id=m["id"],

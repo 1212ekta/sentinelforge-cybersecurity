@@ -4,10 +4,9 @@ import React, { createContext, useContext, useCallback, useEffect, useMemo } fro
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { generateId } from '@/utils/generateId';
 import { config } from '@/lib/config';
+import { getOrCreateGuestId } from '@/lib/guestId';
 import type { ChatMessage, Conversation } from '../types/chat.types';
 
-const CONVERSATIONS_KEY = 'sf-chat-conversations';
-const ACTIVE_ID_KEY = 'sf-active-chat-id';
 const API_BASE = config.apiBaseUrl;
 
 function deriveTitle(messages: ChatMessage[]): string {
@@ -30,11 +29,16 @@ interface ChatHistoryContextType {
   duplicateConversation: (id: string) => void;
   exportConversation: (id: string) => void;
   updateActiveMessages: (messages: ChatMessage[]) => void;
+  clearAllGuestConversations: () => Promise<void>;
 }
 
 const ChatHistoryContext = createContext<ChatHistoryContextType | undefined>(undefined);
 
 export function ChatHistoryProvider({ children }: { children: React.ReactNode }) {
+  const guestId = getOrCreateGuestId();
+  const CONVERSATIONS_KEY = `sf-chat-conversations-${guestId}`;
+  const ACTIVE_ID_KEY = `sf-active-chat-id-${guestId}`;
+
   const [conversations, setConversations] = useLocalStorage<Conversation[]>(
     CONVERSATIONS_KEY,
     []
@@ -55,11 +59,13 @@ export function ChatHistoryProvider({ children }: { children: React.ReactNode })
     };
   }, []);
 
-  // Sync conversations from backend database on mount
+  // Sync conversations from backend for current guest ID on mount
   useEffect(() => {
     async function syncBackendConversations() {
       try {
-        const res = await fetch(`${API_BASE}/conversations`);
+        const res = await fetch(`${API_BASE}/conversations`, {
+          headers: { 'X-Guest-ID': guestId },
+        });
         if (!res.ok) return;
         const data: Array<{ id: string; title: string; created_at: string; updated_at: string }> = await res.json();
         if (data.length > 0) {
@@ -78,11 +84,11 @@ export function ChatHistoryProvider({ children }: { children: React.ReactNode })
           });
         }
       } catch {
-        // Fallback silently to localStorage
+        // Fallback silently to local state
       }
     }
     syncBackendConversations();
-  }, [setConversations]);
+  }, [guestId, setConversations]);
 
   useEffect(() => {
     if (conversations.length === 0) {
@@ -112,20 +118,25 @@ export function ChatHistoryProvider({ children }: { children: React.ReactNode })
 
     fetch(`${API_BASE}/conversations`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Guest-ID': guestId,
+      },
       body: JSON.stringify({ title: 'New Chat' }),
     }).catch(() => {});
 
     return newConv.id;
-  }, [createNewConversation, setConversations, setActiveId]);
+  }, [createNewConversation, guestId, setConversations, setActiveId]);
 
   const selectConversation = useCallback(
     async (id: string) => {
       setActiveId(id);
 
-      // Load messages from backend for selected conversation
+      // Load messages from backend for selected conversation (scoped by guestId)
       try {
-        const res = await fetch(`${API_BASE}/conversations/${id}/messages`);
+        const res = await fetch(`${API_BASE}/conversations/${id}/messages`, {
+          headers: { 'X-Guest-ID': guestId },
+        });
         if (!res.ok) return;
         const msgs: Array<{ id: string; role: 'user' | 'assistant' | 'system'; content: string; created_at: string }> = await res.json();
         const chatMsgs: ChatMessage[] = msgs.map((m) => ({
@@ -142,7 +153,7 @@ export function ChatHistoryProvider({ children }: { children: React.ReactNode })
         // Ignore
       }
     },
-    [setActiveId, setConversations]
+    [guestId, setActiveId, setConversations]
   );
 
   const deleteConversation = useCallback(
@@ -160,10 +171,28 @@ export function ChatHistoryProvider({ children }: { children: React.ReactNode })
         return filtered;
       });
 
-      fetch(`${API_BASE}/conversations/${id}`, { method: 'DELETE' }).catch(() => {});
+      fetch(`${API_BASE}/conversations/${id}`, {
+        method: 'DELETE',
+        headers: { 'X-Guest-ID': guestId },
+      }).catch(() => {});
     },
-    [activeId, createNewConversation, setConversations, setActiveId]
+    [activeId, createNewConversation, guestId, setConversations, setActiveId]
   );
+
+  const clearAllGuestConversations = useCallback(async () => {
+    try {
+      await fetch(`${API_BASE}/conversations/clear/all`, {
+        method: 'DELETE',
+        headers: { 'X-Guest-ID': guestId },
+      });
+    } catch {
+      // Ignore
+    }
+
+    const fresh = createNewConversation();
+    setConversations([fresh]);
+    setActiveId(fresh.id);
+  }, [createNewConversation, guestId, setConversations, setActiveId]);
 
   const renameConversation = useCallback(
     (id: string, newTitle: string) => {
@@ -175,11 +204,14 @@ export function ChatHistoryProvider({ children }: { children: React.ReactNode })
 
       fetch(`${API_BASE}/conversations/${id}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Guest-ID': guestId,
+        },
         body: JSON.stringify({ title: trimmed }),
       }).catch(() => {});
     },
-    [setConversations]
+    [guestId, setConversations]
   );
 
   const duplicateConversation = useCallback(
@@ -248,6 +280,7 @@ export function ChatHistoryProvider({ children }: { children: React.ReactNode })
       duplicateConversation,
       exportConversation,
       updateActiveMessages,
+      clearAllGuestConversations,
     }),
     [
       sortedConversations,
@@ -260,6 +293,7 @@ export function ChatHistoryProvider({ children }: { children: React.ReactNode })
       duplicateConversation,
       exportConversation,
       updateActiveMessages,
+      clearAllGuestConversations,
     ]
   );
 

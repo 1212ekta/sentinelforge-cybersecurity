@@ -1,5 +1,7 @@
 import { config } from '@/lib/config';
+import { getOrCreateGuestId } from '@/lib/guestId';
 import { ApiError, type RequestOptions } from '@/types/api.types';
+
 
 /**
  * Combines an internal timeout controller with an optional external signal,
@@ -38,13 +40,18 @@ export async function postJson<TReq, TRes>(
 
   let response: Response;
   try {
+    const guestId = getOrCreateGuestId();
     response = await fetch(`${config.apiBaseUrl}${path}`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Guest-ID': guestId,
+      },
       body: JSON.stringify(body),
       signal,
     });
   } catch (err) {
+
     cleanup();
     if (err instanceof DOMException && err.name === 'AbortError') {
       const wasTimeout = !options.signal?.aborted;

@@ -30,7 +30,8 @@ GROQ_API_KEY = os.getenv("GROQ_API_KEY", "").strip()
 async def get_ollama_response(
     prompt: str,
     conversation_id: Optional[str] = None,
-    override_context: Optional[str] = None
+    override_context: Optional[str] = None,
+    guest_id: str = "default_guest"
 ) -> Dict[str, Any]:
     """
     Executes a structured cybersecurity analysis prompt against local Ollama LLM
@@ -53,13 +54,14 @@ async def get_ollama_response(
 
     # 1. Save user prompt & fetch conversation history from MongoDB
     try:
-        user_msg = await MongoConversationRepository.add_message(cid, "user", prompt)
+        user_msg = await MongoConversationRepository.add_message(cid, "user", prompt, guest_id=guest_id)
         cid = user_msg["conversation_id"]
-        db_messages = await MongoConversationRepository.get_messages(cid)
+        db_messages = await MongoConversationRepository.get_messages(cid, guest_id=guest_id)
         history_messages = [{"role": m["role"], "content": m["content"]} for m in db_messages[:-1]]
     except Exception as db_err:
         logger.warning(f"MongoDB persistence unavailable ({db_err}). Proceeding in ephemeral mode.")
         history_messages = []
+
 
     # 2. Retrieve authoritative RAG security context
     rag_result = rag_service.retrieve_context(prompt) if not override_context else {"context_text": override_context, "citations": []}
@@ -137,8 +139,9 @@ async def get_ollama_response(
 
     # 5. Save assistant response to MongoDB
     try:
-        await MongoConversationRepository.add_message(cid, "assistant", reply)
+        await MongoConversationRepository.add_message(cid, "assistant", reply, guest_id=guest_id)
     except Exception as db_err:
+
         logger.warning(f"Failed to save assistant response to MongoDB: {db_err}")
 
     processing_time = round(time.time() - start_time, 3)

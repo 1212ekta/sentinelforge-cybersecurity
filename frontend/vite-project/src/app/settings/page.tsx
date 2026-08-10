@@ -1,14 +1,20 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Settings, Moon, Sun, Monitor, Server, Save, CheckCircle2, XCircle, Info, Cpu, Sparkles } from 'lucide-react';
+import { Settings, Moon, Sun, Monitor, Server, Save, CheckCircle2, XCircle, Info, Cpu, Sparkles, UserCheck, Trash2 } from 'lucide-react';
 import { useTheme } from '@/hooks/useTheme';
 import { config } from '@/lib/config';
+import { getOrCreateGuestId } from '@/lib/guestId';
+import { useChatHistory } from '@/features/chat/hooks/useChatHistory';
 
 export default function SettingsPage() {
   const { theme, setTheme } = useTheme();
+  const { clearAllGuestConversations } = useChatHistory();
   const [isSaved, setIsSaved] = useState(false);
+  const [showClearModal, setShowClearModal] = useState(false);
   const [apiHealth, setApiHealth] = useState<'checking' | 'healthy' | 'unreachable'>('checking');
+  const guestId = getOrCreateGuestId();
+
 
   useEffect(() => {
     async function checkHealth() {
@@ -162,6 +168,46 @@ export default function SettingsPage() {
             </div>
           </div>
 
+          {/* Section 4: Guest Session & Privacy */}
+          <div className="rounded-xl border border-border bg-card p-5 shadow-xs flex flex-col gap-4">
+            <div className="flex items-center justify-between border-b border-border/60 pb-3">
+              <div className="flex items-center gap-2 font-semibold text-sm text-foreground">
+                <UserCheck size={16} className="text-primary" />
+                <span>Guest Session & Privacy</span>
+              </div>
+              <span className="text-xs text-muted-foreground">Anonymous browser persistence</span>
+            </div>
+
+            <div className="flex flex-col gap-3 text-xs">
+              <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/30">
+                <div className="flex flex-col gap-0.5">
+                  <span className="text-muted-foreground text-[11px]">Anonymous Guest ID</span>
+                  <span className="font-mono text-foreground font-semibold">{guestId}</span>
+                </div>
+                <span className="text-[10px] text-emerald-500 font-medium px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20">
+                  Active Session
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/30">
+                <div className="flex flex-col gap-0.5">
+                  <span className="font-semibold text-foreground">Clear Chat History</span>
+                  <span className="text-muted-foreground text-[11px]">
+                    Deletes all conversations associated with this browser session. Keeps your Guest ID intact.
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowClearModal(true)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-danger/30 bg-danger/10 text-danger hover:bg-danger/20 text-xs font-semibold transition-colors cursor-pointer shrink-0"
+                >
+                  <Trash2 size={14} />
+                  <span>Clear History</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
           {/* Save Action */}
           <div className="flex items-center justify-end gap-3 pt-2">
             {isSaved && (
@@ -178,6 +224,36 @@ export default function SettingsPage() {
             </button>
           </div>
         </form>
+
+        {showClearModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4">
+            <div className="w-full max-w-sm rounded-xl border border-border bg-card p-6 shadow-2xl flex flex-col gap-4 text-left animate-message-enter">
+              <h3 className="font-bold text-base text-foreground">Clear Chat History</h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Clear all chat history for this browser?
+              </p>
+              <div className="flex items-center justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowClearModal(false)}
+                  className="px-4 py-2 rounded-lg border border-border bg-muted/50 text-xs font-medium text-foreground hover:bg-muted transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    await clearAllGuestConversations();
+                    setShowClearModal(false);
+                  }}
+                  className="px-4 py-2 rounded-lg bg-danger text-white text-xs font-semibold hover:bg-danger/90 transition-colors shadow-2xs cursor-pointer"
+                >
+                  Clear History
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

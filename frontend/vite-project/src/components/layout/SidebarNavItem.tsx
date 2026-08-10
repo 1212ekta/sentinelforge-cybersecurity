@@ -23,23 +23,19 @@ export function SidebarNavItem({ item, collapsed, onNavigate }: SidebarNavItemPr
     <a
       href={item.href}
       onClick={handleClick}
+      aria-current={isActive ? 'page' : undefined}
       className={cn(
-        'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors cursor-pointer',
+        'group flex items-center gap-3 rounded-lg px-3 py-2 text-xs sm:text-sm font-medium transition-all duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
         isActive
-          ? 'bg-primary/10 text-primary font-semibold'
-          : 'text-sidebar-foreground/80 hover:bg-muted hover:text-sidebar-foreground',
-        collapsed && 'justify-center px-2'
+          ? 'bg-primary/12 text-primary font-semibold border-r-2 border-primary'
+          : 'text-sidebar-foreground/75 hover:bg-muted/70 hover:text-sidebar-foreground',
+        collapsed && 'justify-center px-2 border-r-0'
       )}
       title={collapsed ? item.label : undefined}
     >
-      <Icon size={18} className="shrink-0" />
+      <Icon size={18} className={cn('shrink-0 transition-transform duration-150 group-hover:scale-105', isActive ? 'text-primary' : 'text-muted-foreground group-hover:text-sidebar-foreground')} />
       {!collapsed && (
         <span className="flex-1 truncate">{item.label}</span>
-      )}
-      {!collapsed && item.comingSoon && (
-        <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground font-normal">
-          Soon
-        </span>
       )}
     </a>
   );

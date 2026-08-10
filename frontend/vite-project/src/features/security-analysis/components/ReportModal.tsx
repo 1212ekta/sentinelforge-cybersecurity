@@ -37,10 +37,12 @@ export function ReportModal({ report, onClose }: Props) {
           </div>
           <button
             onClick={onClose}
-            className="p-1 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted"
+            aria-label="Close report modal"
+            className="p-1 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
           >
             <X size={20} />
           </button>
+
         </div>
 
         <div className="bg-muted/30 p-4 rounded-xl border border-border font-mono text-xs text-foreground overflow-x-auto whitespace-pre-wrap leading-relaxed max-h-[50vh] overflow-y-auto">

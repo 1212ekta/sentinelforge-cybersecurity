@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
 import { AppShell } from '@/components/layout/AppShell';
 import { ChatHistoryProvider } from '@/features/chat/context/ChatHistoryContext';
+import { WelcomeScreen } from '@/components/welcome/WelcomeScreen';
 import ChatPage from '@/app/chat/page';
 import FileAnalysisPage from '@/app/file-analysis/page';
 import LogAnalysisPage from '@/app/log-analysis/page';
@@ -13,10 +14,19 @@ import '@/style.css';
 
 function MainApp() {
   const [currentPath, setCurrentPath] = useState(window.location.pathname);
+  const [hasVisited, setHasVisited] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return true;
+    if (window.location.pathname === '/welcome') return false;
+    return localStorage.getItem('sf_welcome_completed') === 'true';
+  });
 
   useEffect(() => {
     const handlePopState = () => {
-      setCurrentPath(window.location.pathname);
+      const path = window.location.pathname;
+      setCurrentPath(path);
+      if (path === '/welcome') {
+        setHasVisited(false);
+      }
     };
     window.addEventListener('popstate', handlePopState);
 
@@ -24,6 +34,9 @@ function MainApp() {
       if (e.detail) {
         window.history.pushState({}, '', e.detail);
         setCurrentPath(e.detail);
+        if (e.detail !== '/welcome') {
+          setHasVisited(true);
+        }
       }
     };
 
@@ -34,6 +47,19 @@ function MainApp() {
       window.removeEventListener('navigate' as any, handleCustomNav);
     };
   }, []);
+
+  const handleStart = () => {
+    localStorage.setItem('sf_welcome_completed', 'true');
+    setHasVisited(true);
+    if (currentPath === '/' || currentPath === '/welcome') {
+      window.history.pushState({}, '', '/chat');
+      setCurrentPath('/chat');
+    }
+  };
+
+  if (!hasVisited || currentPath === '/welcome') {
+    return <WelcomeScreen onStart={handleStart} />;
+  }
 
   let pageContent = <ChatPage />;
   if (currentPath.startsWith('/file-analysis')) {
@@ -60,3 +86,4 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <MainApp />
   </React.StrictMode>
 );
+

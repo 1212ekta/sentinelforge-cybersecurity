@@ -1,12 +1,16 @@
 # SentinelForge — AI-Powered Cybersecurity Assistant
 
-[![Production Status](https://img.shields.io/badge/Status-Production--Ready-emerald.svg)](#) [![License](https://img.shields.io/badge/License-MIT-blue.svg)](#) [![Framework](https://img.shields.io/badge/Stack-Next.js%20%7C%20FastAPI%20%7C%20SQLAlchemy-violet.svg)](#)
+[![Live Application](https://img.shields.io/badge/Live%20App-sentinelforge--cybersecurity.vercel.app-emerald.svg?style=for-the-badge&logo=vercel)](https://sentinelforge-cybersecurity.vercel.app/)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](#)
+
+**Deployed Live Link**: [https://sentinelforge-cybersecurity.vercel.app/](https://sentinelforge-cybersecurity.vercel.app/)
 
 SentinelForge is a specialized, production-ready AI Cybersecurity Assistant designed for defensive security engineering, application security (AppSec) code reviews, static vulnerability assessments, security log auditing, and executive assessment report generation.
 
 ---
 
 ## Overview
+
 
 Unlike generic AI chatbots, **SentinelForge** is specifically tuned and grounded for defensive cybersecurity domain tasks. It combines local LLM reasoning (`phi3:mini` via Ollama) with a modular Retrieval-Augmented Generation (RAG) pipeline, structured static security pattern analysis, PostgreSQL persistence, and Markdown security report generation.
 
@@ -251,6 +255,8 @@ python -m compileall .
 
 ## Production Deployment
 
-- **Frontend**: Deploy on Vercel setting `NEXT_PUBLIC_API_BASE_URL`.
-- **Backend API**: Deploy on Render / Railway setting `DATABASE_URL` and `ALLOWED_ORIGINS`.
-- **Database**: Managed PostgreSQL on Neon / Supabase.
+- **Live Application**: [https://sentinelforge-cybersecurity.vercel.app/](https://sentinelforge-cybersecurity.vercel.app/)
+- **Frontend**: Deployed on Vercel setting `NEXT_PUBLIC_API_BASE_URL` & `VITE_API_BASE_URL`.
+- **Backend API**: Deployed on Render / Railway setting `DATABASE_URL` and `ALLOWED_ORIGINS`.
+- **Database**: Managed MongoDB Atlas / PostgreSQL.
+

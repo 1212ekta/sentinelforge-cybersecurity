@@ -118,11 +118,11 @@ export default function FileAnalysisPage() {
       <div className="max-w-4xl w-full mx-auto flex flex-col gap-6">
         {/* Header */}
         <div className="flex items-center gap-3 border-b border-border pb-4">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20">
-            <FolderSearch size={22} />
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20 shrink-0">
+            <FileSearch size={22} />
           </div>
           <div>
-            <h1 className="text-xl font-bold tracking-tight text-foreground">Security File Analysis & Findings</h1>
+            <h1 className="text-lg sm:text-xl font-bold tracking-tight text-foreground">File Security Analysis</h1>
             <p className="text-xs text-muted-foreground">Upload source code or log files for automated security audits, structured vulnerability findings, and executive reporting.</p>
           </div>
         </div>
@@ -138,10 +138,10 @@ export default function FileAnalysisPage() {
               onDragLeave={() => setIsDragOver(false)}
               onDrop={handleDrop}
               onClick={() => fileInputRef.current?.click()}
-              className={`flex flex-col items-center justify-center gap-3 p-8 border-2 border-dashed rounded-2xl cursor-pointer transition-all ${
+              className={`flex flex-col items-center justify-center gap-3 p-8 sm:p-10 border-2 border-dashed rounded-xl cursor-pointer transition-all ${
                 isDragOver
                   ? 'border-primary bg-primary/10'
-                  : 'border-border bg-card/60 hover:bg-muted/80 hover:border-primary/40'
+                  : 'border-border bg-card/60 hover:bg-muted/70 hover:border-primary/40'
               }`}
             >
               <input
@@ -151,28 +151,32 @@ export default function FileAnalysisPage() {
                 onChange={handleFileChange}
                 className="hidden"
               />
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20">
                 <Upload size={24} />
               </div>
-              <div className="text-center">
+              <div className="text-center space-y-1">
                 <p className="text-sm font-semibold text-foreground">
-                  {file ? file.name : 'Click to upload or drag & drop file'}
+                  {file ? file.name : 'Upload source code or log files for security analysis.'}
                 </p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Supported extensions: <span className="font-mono text-primary">{ALLOWED_EXTENSIONS.join(', ')}</span> (Max 5MB)
+                <p className="text-xs text-muted-foreground">
+                  Supported: <span className="font-mono text-primary font-medium">{ALLOWED_EXTENSIONS.join(', ')}</span> (Max 5MB)
                 </p>
+                <div className="flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground/80 pt-1">
+                  <ShieldCheck size={14} className="text-emerald-500 shrink-0" />
+                  <span>Files are analyzed as text and are never executed.</span>
+                </div>
               </div>
             </div>
 
             {error && (
-              <div className="flex items-center gap-2 p-3 rounded-lg border border-red-500/30 bg-red-500/10 text-red-500 text-xs font-medium">
-                <AlertTriangle size={16} />
+              <div className="flex items-center gap-2 p-3 rounded-xl border border-red-500/30 bg-red-500/10 text-red-500 text-xs font-medium">
+                <AlertTriangle size={16} className="shrink-0" />
                 <span>{error}</span>
               </div>
             )}
 
             {file && (
-              <div className="flex items-center justify-between p-4 rounded-xl border border-border bg-card">
+              <div className="flex items-center justify-between p-4 rounded-xl border border-border bg-card shadow-xs">
                 <div className="flex items-center gap-3">
                   <FileCode size={20} className="text-primary" />
                   <div>
@@ -183,7 +187,7 @@ export default function FileAnalysisPage() {
                 <button
                   onClick={handleUpload}
                   disabled={loading}
-                  className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-all shadow-xs disabled:opacity-50"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-primary text-primary-foreground text-xs sm:text-sm font-medium hover:bg-primary/90 transition-all shadow-xs disabled:opacity-50 cursor-pointer"
                 >
                   {loading ? (
                     <>
@@ -201,6 +205,7 @@ export default function FileAnalysisPage() {
             )}
           </div>
         )}
+
 
         {/* Structured Findings View */}
         {analysis && (

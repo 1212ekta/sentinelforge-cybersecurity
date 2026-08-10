@@ -32,10 +32,12 @@ export function FindingDetailsModal({ finding, onClose }: Props) {
           </div>
           <button
             onClick={onClose}
-            className="p-1 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted"
+            aria-label="Close details"
+            className="p-1 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
           >
             <X size={20} />
           </button>
+
         </div>
 
         <div className="flex flex-col gap-4 text-xs">

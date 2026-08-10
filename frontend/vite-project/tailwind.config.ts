@@ -23,6 +23,9 @@ export default {
           DEFAULT: 'hsl(var(--primary))',
           foreground: 'hsl(var(--primary-foreground))',
         },
+        accent: {
+          DEFAULT: 'hsl(var(--accent-cyan))',
+        },
         muted: {
           DEFAULT: 'hsl(var(--muted))',
           foreground: 'hsl(var(--muted-foreground))',
@@ -31,8 +34,10 @@ export default {
         ring: 'hsl(var(--ring))',
         danger: 'hsl(var(--danger))',
         success: 'hsl(var(--success))',
+        warning: 'hsl(var(--warning))',
       },
     },
   },
   plugins: [],
 } satisfies Config;
+

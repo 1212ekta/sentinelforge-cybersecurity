@@ -136,18 +136,36 @@ async def analyze_security_file(content_bytes: bytes, filename: str) -> Analysis
                 created_at=iso_now
             ))
 
-    # 2. LLM Summary
+    # 2. Non-blocking LLM Summary
     summary_prompt = f"Summarize security audit results for {clean_name} ({file_type}) with {len(findings)} findings."
+    summary = f"SentinelForge analyzed {clean_name} and identified {len(findings)} potential security findings."
+
+    groq_key = os.getenv("GROQ_API_KEY", "").strip()
+    import httpx
     try:
-        res = requests.post(
-            f"{OLLAMA_URL}/api/generate",
-            json={"model": MODEL, "prompt": summary_prompt, "stream": False, "options": {"num_predict": 100}},
-            timeout=180,
-        )
-        res.raise_for_status()
-        summary = res.json().get("response", "Security assessment completed successfully.")
-    except Exception:
-        summary = f"SentinelForge analyzed {clean_name} and identified {len(findings)} potential security findings."
+        async with httpx.AsyncClient(timeout=3.0) as client:
+            if groq_key:
+                res = await client.post(
+                    "https://api.groq.com/openai/v1/chat/completions",
+                    headers={"Authorization": f"Bearer {groq_key}", "Content-Type": "application/json"},
+                    json={
+                        "model": "llama-3.1-8b-instant",
+                        "messages": [{"role": "user", "content": summary_prompt}],
+                        "max_tokens": 100,
+                    },
+                )
+                if res.status_code == 200:
+                    summary = res.json()["choices"][0]["message"]["content"]
+            else:
+                res = await client.post(
+                    f"{OLLAMA_URL}/api/generate",
+                    json={"model": MODEL, "prompt": summary_prompt, "stream": False, "options": {"num_predict": 80}},
+                )
+                if res.status_code == 200:
+                    summary = res.json().get("response", summary)
+    except Exception as sum_err:
+        logger.debug(f"Fast summary generation skipped: {sum_err}")
+
 
     stats = compute_statistics(findings)
     risk_level = compute_overall_risk(stats)

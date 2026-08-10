@@ -56,16 +56,17 @@ export async function postJson<TReq, TRes>(
     if (err instanceof DOMException && err.name === 'AbortError') {
       const wasTimeout = !options.signal?.aborted;
       throw new ApiError(
-        wasTimeout ? 'Request timed out.' : 'Request was cancelled.',
+        wasTimeout ? 'AI analysis is taking longer than expected. Please retry.' : 'Generation stopped by user.',
         undefined,
         wasTimeout ? 'timeout' : 'aborted'
       );
     }
     throw new ApiError(
-      'Could not reach the server. Is the backend running?',
+      'Security analysis service is temporarily unavailable.',
       undefined,
       'network'
     );
+
   }
   cleanup();
 

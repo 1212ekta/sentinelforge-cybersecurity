@@ -22,9 +22,9 @@ function getErrorMessage(err: unknown): string {
       case "aborted":
         return "Generation stopped by user.";
       case "timeout":
-        return "Request timed out. The backend server took too long to respond.";
+        return "AI analysis is taking longer than expected. Please retry.";
       case "network":
-        return "Could not connect to backend server. Please verify backend is running.";
+        return "Security analysis service is temporarily unavailable.";
       case "parse":
         return "Received an invalid response format from the server.";
       case "http":
@@ -162,8 +162,10 @@ export function useChat(opts?: UseChatOptions) {
 
   const retryMessage = React.useCallback(
     async (assistantMessageId: string) => {
+      if (isSending) return;
       const failedMsg = messages.find((m) => m.id === assistantMessageId);
       if (!failedMsg || failedMsg.role !== "assistant") return;
+
 
       const idx = messages.findIndex((m) => m.id === assistantMessageId);
       let prompt = "";

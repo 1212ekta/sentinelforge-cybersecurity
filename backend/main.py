@@ -40,3 +40,47 @@ app.include_router(conversations_router)
 @app.get("/")
 def home():
     return {"message": "Welcome to SentinelForge API"}
+
+@app.get("/health")
+def health_check():
+    """Quick, non-blocking health endpoint required by load balancers and diagnostic monitors."""
+    return {"status": "ok", "service": "SentinelForge API"}
+
+@app.get("/health/ai")
+async def ai_health_check():
+    """Diagnostic endpoint to verify AI engine readiness (Groq cloud or Ollama local) without exposing secrets."""
+    import httpx
+    groq_key = os.getenv("GROQ_API_KEY", "").strip()
+    ollama_url = os.getenv("OLLAMA_URL", "http://localhost:11434").strip()
+
+    if groq_key:
+        return {
+            "status": "ok",
+            "provider": "groq",
+            "model": os.getenv("GROQ_MODEL", "llama-3.1-8b-instant"),
+            "groq_configured": True
+        }
+
+    try:
+        async with httpx.AsyncClient(timeout=2.0) as client:
+            res = await client.get(f"{ollama_url}/api/tags")
+            if res.status_code == 200:
+                return {
+                    "status": "ok",
+                    "provider": "ollama",
+                    "model": os.getenv("OLLAMA_MODEL", "phi3:mini"),
+                    "ollama_url": ollama_url
+                }
+    except Exception as e:
+        return {
+            "status": "degraded",
+            "provider": "none",
+            "error": f"Ollama engine unreachable at {ollama_url}. Groq API key not configured.",
+            "detail": str(e)
+        }
+
+    return {
+        "status": "degraded",
+        "provider": "none",
+        "error": "No active LLM provider configured."
+    }

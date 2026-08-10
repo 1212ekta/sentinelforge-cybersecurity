@@ -1,12 +1,20 @@
 'use client';
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { ShieldAlert, MessageSquare, FileSearch, FileBarChart, ArrowRight, ShieldCheck } from 'lucide-react';
-
+import { ShieldAlert, MessageSquare, FileSearch, FileBarChart, ArrowRight, ShieldCheck, AlertTriangle } from 'lucide-react';
+import { cn } from '@/utils/cn';
 
 interface WelcomeScreenProps {
   onStart: () => void;
 }
+
+const SECURITY_CONCEPT_BUBBLES = [
+  { icon: ShieldAlert, label: 'Vulnerability', style: { top: '14%', left: '6%', animationDelay: '0s' }, floatClass: 'animate-bubble-float' },
+  { icon: MessageSquare, label: 'AI Analysis', style: { top: '18%', right: '5%', animationDelay: '1.5s' }, floatClass: 'animate-bubble-float-alt' },
+  { icon: AlertTriangle, label: 'Threat Detection', style: { top: '48%', left: '2%', animationDelay: '2.5s' }, floatClass: 'animate-bubble-float-alt' },
+  { icon: FileSearch, label: 'Code Analysis', style: { bottom: '22%', left: '5%', animationDelay: '3.5s' }, floatClass: 'animate-bubble-float' },
+  { icon: FileBarChart, label: 'Security Reports', style: { bottom: '16%', right: '6%', animationDelay: '4.5s' }, floatClass: 'animate-bubble-float' },
+];
 
 export function WelcomeScreen({ onStart }: WelcomeScreenProps) {
   const heroRef = useRef<HTMLDivElement | null>(null);
@@ -58,6 +66,29 @@ export function WelcomeScreen({ onStart }: WelcomeScreenProps) {
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_70%_40%,rgba(14,165,233,0.12),rgba(15,23,42,0))] pointer-events-none" />
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b15_1px,transparent_1px),linear-gradient(to_bottom,#1e293b15_1px,transparent_1px)] bg-[size:3.5rem_3.5rem] pointer-events-none opacity-40" />
 
+      {/* Floating Security Concept Bubbles */}
+      {!prefersReducedMotion && (
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          {SECURITY_CONCEPT_BUBBLES.map((b, idx) => {
+            const Icon = b.icon;
+            return (
+              <div
+                key={idx}
+                style={b.style}
+                className={cn(
+                  'hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-slate-700/60 bg-[#111D2E]/80 backdrop-blur-md shadow-lg text-slate-300 text-[11px] font-medium opacity-75 transition-opacity',
+                  b.floatClass
+                )}
+              >
+                <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 shrink-0" />
+                <Icon size={13} className="text-cyan-400 shrink-0" />
+                <span>{b.label}</span>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
       {/* Top Header Bar */}
       <header className="relative z-10 flex items-center justify-between max-w-7xl w-full mx-auto pb-4 shrink-0 border-b border-slate-800/80">
         <div className="flex items-center gap-2.5">
@@ -71,7 +102,6 @@ export function WelcomeScreen({ onStart }: WelcomeScreenProps) {
           </span>
         </div>
       </header>
-
 
       {/* Main Two-Column Hero Experience */}
       <main className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center max-w-7xl w-full mx-auto my-auto py-6 sm:py-10">
@@ -116,7 +146,6 @@ export function WelcomeScreen({ onStart }: WelcomeScreenProps) {
               Guest mode — your chats are saved for this browser.
             </span>
           </div>
-
         </div>
 
         {/* Right Column (~58% width) - Interactive 3D Parallax Visual */}

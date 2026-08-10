@@ -110,6 +110,24 @@
   }
 }
 
+@keyframes bubbleFloat {
+  0%, 100% {
+    transform: translateY(0px) scale(1);
+  }
+  50% {
+    transform: translateY(-7px) scale(1.03);
+  }
+}
+
+@keyframes bubbleFloatAlt {
+  0%, 100% {
+    transform: translateY(0px) scale(1);
+  }
+  50% {
+    transform: translateY(7px) scale(1.03);
+  }
+}
+
 .animate-message-enter {
   animation: messageEnter 180ms ease-out forwards;
 }
@@ -122,11 +140,22 @@
   animation: dotPulse 1.2s infinite ease-in-out;
 }
 
+.animate-bubble-float {
+  animation: bubbleFloat 7s ease-in-out infinite;
+}
+
+.animate-bubble-float-alt {
+  animation: bubbleFloatAlt 8s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-message-enter,
   .animate-slide-in-left,
-  .animate-dot-pulse {
+  .animate-dot-pulse,
+  .animate-bubble-float,
+  .animate-bubble-float-alt {
     animation: none !important;
-    transition: none !important;
+    transition: opacity 0.2s ease-out !important;
+    transform: none !important;
   }
 }

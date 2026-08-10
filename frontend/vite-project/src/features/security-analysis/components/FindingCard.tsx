@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { ShieldAlert, AlertTriangle, ShieldCheck, Info, ExternalLink, FileCode } from 'lucide-react';
+import { ShieldAlert, AlertTriangle, Shield, Info, ExternalLink, FileCode } from 'lucide-react';
 import type { SecurityFinding } from '../types/security-analysis.types';
 
 interface Props {
@@ -30,7 +30,7 @@ export function FindingCard({ finding, onViewDetails }: Props) {
       case 'LOW':
         return {
           style: 'bg-blue-500/10 text-blue-500 border-blue-500/30',
-          icon: ShieldCheck,
+          icon: Shield,
         };
       default:
         return {
@@ -39,6 +39,7 @@ export function FindingCard({ finding, onViewDetails }: Props) {
         };
     }
   };
+
 
   const badge = getSeverityBadge(finding.severity);
   const SeverityIcon = badge.icon;

@@ -57,7 +57,8 @@ const ChatInput: React.FC<ChatInputProps> = ({
             "min-h-[44px] max-h-32 flex-1 resize-none bg-transparent px-2.5 py-2 text-xs sm:text-sm text-foreground placeholder:text-muted-foreground/70",
             "focus:outline-none focus:ring-0 disabled:cursor-not-allowed disabled:opacity-50"
           )}
-          placeholder={placeholder || "Ask SentinelForge about security vulnerabilities, code audits, or threat remediation..."}
+          placeholder={placeholder || "Ask SentinelForge about vulnerabilities, code audits, or threat remediation..."}
+
           value={value}
           onChange={(e) => setValue(e.target.value)}
           onKeyDown={onKeyDown}

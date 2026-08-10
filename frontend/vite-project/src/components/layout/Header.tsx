@@ -50,9 +50,9 @@ export function Header({ onOpenMobileNav }: HeaderProps) {
       : pathname?.startsWith(item.href)
   );
 
-  const title = activeItem?.label ?? 'SentinelForge';
-  const matchedRoute = activeItem?.href ?? '/chat';
+  const title = matchedRoute === '/chat' ? 'AI Security Analyst' : (activeItem?.label ?? 'SentinelForge');
   const description = ROUTE_DESCRIPTIONS[matchedRoute] ?? 'AI Cybersecurity Workspace';
+
 
   const handleBrandClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();

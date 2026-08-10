@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState, useRef, useMemo } from 'react';
-import { FolderSearch, Upload, FileCode, ShieldAlert, AlertTriangle, CheckCircle2, RefreshCw } from 'lucide-react';
+import { FileSearch, Upload, FileCode, ShieldAlert, AlertTriangle, CheckCircle2, RefreshCw, ShieldCheck } from 'lucide-react';
 import type { AnalysisResponse, SecurityFinding, ReportResponse } from '@/features/security-analysis/types/security-analysis.types';
+
 import { RiskSummaryHeader } from '@/features/security-analysis/components/RiskSummaryHeader';
 import { FindingFilters } from '@/features/security-analysis/components/FindingFilters';
 import { FindingCard } from '@/features/security-analysis/components/FindingCard';

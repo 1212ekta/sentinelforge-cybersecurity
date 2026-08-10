@@ -112,8 +112,9 @@ export default function LogAnalysisPage() {
   }, [analysis, selectedSeverity, searchQuery]);
 
   return (
-    <div className="flex flex-1 flex-col overflow-y-auto p-4 sm:p-8 bg-background text-foreground">
-      <div className="max-w-4xl w-full mx-auto flex flex-col gap-6">
+    <div className="h-full w-full overflow-y-auto p-4 sm:p-8 bg-background text-foreground">
+      <div className="max-w-4xl w-full mx-auto flex flex-col gap-6 pb-16">
+
         {/* Header */}
         <div className="flex items-center gap-3 border-b border-border pb-4">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20 shrink-0">

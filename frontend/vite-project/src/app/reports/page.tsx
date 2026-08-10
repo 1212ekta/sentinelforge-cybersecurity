@@ -58,8 +58,9 @@ export default function ReportsPage() {
   };
 
   return (
-    <div className="flex flex-1 flex-col overflow-y-auto p-4 sm:p-8 bg-background text-foreground">
-      <div className="max-w-4xl w-full mx-auto flex flex-col gap-6">
+    <div className="h-full w-full overflow-y-auto p-4 sm:p-8 bg-background text-foreground">
+      <div className="max-w-4xl w-full mx-auto flex flex-col gap-6 pb-16">
+
         {/* Header */}
         <div className="flex items-center justify-between border-b border-border pb-4 gap-3">
           <div className="flex items-center gap-3">

@@ -15,10 +15,10 @@ export function AppShell({ children }: { children: ReactNode }) {
       <Sidebar collapsed={collapsed} onToggle={() => setCollapsed((c) => !c)} />
       <MobileNav open={mobileNavOpen} onClose={() => setMobileNavOpen(false)} />
 
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex min-w-0 flex-1 flex-col h-full overflow-hidden">
         <Header onOpenMobileNav={() => setMobileNavOpen(true)} />
-        <main className="min-h-0 flex-1 overflow-hidden">{children}</main>
+        <main className="h-full min-h-0 flex-1 overflow-hidden relative">{children}</main>
       </div>
     </div>
   );
-}
+}

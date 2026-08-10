@@ -1,25 +1,16 @@
 'use client';
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { ShieldAlert, MessageSquare, FileSearch, FileBarChart, ArrowRight, ShieldCheck, AlertTriangle } from 'lucide-react';
-import { cn } from '@/utils/cn';
+import { ArrowRight, ShieldCheck } from 'lucide-react';
 
 interface WelcomeScreenProps {
   onStart: () => void;
 }
 
-const SECURITY_CONCEPT_BUBBLES = [
-  { icon: ShieldAlert, label: 'Vulnerability', style: { top: '14%', left: '6%', animationDelay: '0s' }, floatClass: 'animate-bubble-float' },
-  { icon: MessageSquare, label: 'AI Analysis', style: { top: '18%', right: '5%', animationDelay: '1.5s' }, floatClass: 'animate-bubble-float-alt' },
-  { icon: AlertTriangle, label: 'Threat Detection', style: { top: '48%', left: '2%', animationDelay: '2.5s' }, floatClass: 'animate-bubble-float-alt' },
-  { icon: FileSearch, label: 'Code Analysis', style: { bottom: '22%', left: '5%', animationDelay: '3.5s' }, floatClass: 'animate-bubble-float' },
-  { icon: FileBarChart, label: 'Security Reports', style: { bottom: '16%', right: '6%', animationDelay: '4.5s' }, floatClass: 'animate-bubble-float' },
-];
-
 export function WelcomeScreen({ onStart }: WelcomeScreenProps) {
   const heroRef = useRef<HTMLDivElement | null>(null);
 
-  // 3D Tilt & Parallax state
+  // 3D Mouse Parallax & Tilt state
   const [tilt, setTilt] = useState({ rotateX: 0, rotateY: 0, translateX: 0, translateY: 0 });
   const [isHovered, setIsHovered] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
@@ -43,7 +34,7 @@ export function WelcomeScreen({ onStart }: WelcomeScreenProps) {
 
     // Subtle 1 to 2.5 degree tilt
     const maxDegrees = 2.5;
-    const maxShift = 10;
+    const maxShift = 8;
 
     setTilt({
       rotateY: mouseX * maxDegrees,
@@ -61,60 +52,37 @@ export function WelcomeScreen({ onStart }: WelcomeScreenProps) {
   };
 
   return (
-    <div className="min-h-screen w-full bg-[#07111F] dark:bg-[#07111F] text-slate-100 flex flex-col justify-between p-4 sm:p-8 lg:p-10 overflow-y-auto selection:bg-cyan-500/20 selection:text-cyan-200 relative">
-      {/* Background Radial Light & Grid Texture */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_70%_40%,rgba(14,165,233,0.12),rgba(15,23,42,0))] pointer-events-none" />
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b15_1px,transparent_1px),linear-gradient(to_bottom,#1e293b15_1px,transparent_1px)] bg-[size:3.5rem_3.5rem] pointer-events-none opacity-40" />
+    <div className="min-h-screen w-full bg-[#07111F] text-slate-100 flex flex-col justify-between p-6 sm:p-10 lg:p-12 overflow-y-auto selection:bg-cyan-500/20 selection:text-cyan-200 relative">
+      {/* Subtle Depth Background Grid & Radial Lighting */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_70%_40%,rgba(14,165,233,0.08),rgba(7,17,31,0))] pointer-events-none" />
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b12_1px,transparent_1px),linear-gradient(to_bottom,#1e293b12_1px,transparent_1px)] bg-[size:4rem_4rem] pointer-events-none opacity-30" />
 
-      {/* Floating Security Concept Bubbles */}
-      {!prefersReducedMotion && (
-        <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          {SECURITY_CONCEPT_BUBBLES.map((b, idx) => {
-            const Icon = b.icon;
-            return (
-              <div
-                key={idx}
-                style={b.style}
-                className={cn(
-                  'hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-slate-700/60 bg-[#111D2E]/80 backdrop-blur-md shadow-lg text-slate-300 text-[11px] font-medium opacity-75 transition-opacity',
-                  b.floatClass
-                )}
-              >
-                <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 shrink-0" />
-                <Icon size={13} className="text-cyan-400 shrink-0" />
-                <span>{b.label}</span>
-              </div>
-            );
-          })}
-        </div>
-      )}
-
-      {/* Top Header Bar */}
-      <header className="relative z-10 flex items-center justify-between max-w-7xl w-full mx-auto pb-4 shrink-0 border-b border-slate-800/80">
-        <div className="flex items-center gap-2.5">
+      {/* Top Header Bar with Clean Brand Mark */}
+      <header className="relative z-10 flex items-center justify-between max-w-7xl w-full mx-auto pb-6 shrink-0 border-b border-slate-800/60">
+        <div className="flex items-center gap-3">
           <img
             src="/sentinelforge-icon.png"
-            alt="SentinelForge Shield Icon"
-            className="h-8 w-8 object-contain rounded-lg shrink-0 shadow-xs"
+            alt="SentinelForge Shield Logo"
+            className="h-8 w-8 object-contain rounded-lg shrink-0"
           />
-          <span className="font-extrabold text-white text-sm sm:text-base tracking-tight font-mono">
+          <span className="font-extrabold text-white text-base tracking-tight font-mono">
             SentinelForge
           </span>
         </div>
       </header>
 
-      {/* Main Two-Column Hero Experience */}
-      <main className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center max-w-7xl w-full mx-auto my-auto py-6 sm:py-10">
+      {/* Main Spacious Hero Composition */}
+      <main className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center max-w-7xl w-full mx-auto my-auto py-8 sm:py-12">
         
-        {/* Left Column (~42% width) */}
-        <div className="lg:col-span-5 flex flex-col items-start gap-5 sm:gap-6 text-left">
+        {/* Left Column (~45% width) - Primary Information Hierarchy */}
+        <div className="lg:col-span-5 flex flex-col items-start gap-6 text-left">
           {/* Small Product Label */}
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-cyan-950/60 border border-cyan-500/30 text-cyan-400 text-[11px] font-mono font-bold tracking-widest uppercase shadow-xs">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-cyan-950/50 border border-cyan-500/25 text-cyan-400 text-[11px] font-mono font-bold tracking-widest uppercase">
             <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-pulse" />
             <span>SENTINELFORGE</span>
           </div>
 
-          {/* Main Heading */}
+          {/* Primary Welcome Heading */}
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white leading-[1.15]">
             Welcome to <br className="hidden sm:inline" />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-100 to-cyan-300">
@@ -122,17 +90,17 @@ export function WelcomeScreen({ onStart }: WelcomeScreenProps) {
             </span>
           </h1>
 
-          {/* Supporting Text */}
+          {/* Clear Supporting Description */}
           <p className="text-sm sm:text-base text-slate-300 leading-relaxed max-w-lg font-normal">
             Your AI-powered cybersecurity workspace for analyzing code, investigating logs, detecting vulnerabilities, and understanding security risks.
           </p>
 
-          {/* Primary CTA Button & Secondary Motto */}
-          <div className="flex flex-col items-start gap-2.5 mt-2">
+          {/* Primary Action Button & Supporting Metadata */}
+          <div className="flex flex-col items-start gap-3 mt-2">
             <button
               onClick={onStart}
               aria-label="Start Here to open SentinelForge cybersecurity workspace"
-              className="inline-flex items-center gap-2.5 px-6 py-3 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-semibold text-sm sm:text-base transition-all duration-200 shadow-lg shadow-cyan-950/50 hover:-translate-y-[2px] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 group"
+              className="inline-flex items-center gap-2.5 px-7 py-3.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-semibold text-sm sm:text-base transition-all duration-200 shadow-xl shadow-cyan-950/60 hover:-translate-y-0.5 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 group"
             >
               <span>Start Here</span>
               <ArrowRight size={18} className="transition-transform duration-200 group-hover:translate-x-1" />
@@ -148,16 +116,16 @@ export function WelcomeScreen({ onStart }: WelcomeScreenProps) {
           </div>
         </div>
 
-        {/* Right Column (~58% width) - Interactive 3D Parallax Visual */}
+        {/* Right Column (~55% width) - Clean Hero Visual */}
         <div className="lg:col-span-7 flex justify-center items-center w-full relative">
           <div
             ref={heroRef}
             onMouseMove={handleMouseMove}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
-            className="relative w-full max-w-2xl p-4 sm:p-6 cursor-pointer select-none perspective-[1000px]"
+            className="relative w-full max-w-xl p-2 cursor-pointer select-none perspective-[1000px]"
           >
-            {/* 3D Wrapper Container */}
+            {/* Clean 3D Hero Wrapper without Overlaid Placeholders */}
             <div
               style={{
                 transform: prefersReducedMotion
@@ -166,97 +134,20 @@ export function WelcomeScreen({ onStart }: WelcomeScreenProps) {
                 transition: isHovered ? 'transform 0.1s cubic-bezier(0.2, 0, 0.2, 1)' : 'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
                 transformStyle: 'preserve-3d',
               }}
-              className="relative w-full rounded-2xl border border-slate-700/60 bg-slate-900/60 p-2 shadow-2xl backdrop-blur-xs transition-shadow duration-300 hover:border-cyan-500/40 hover:shadow-cyan-950/40"
+              className="relative w-full rounded-2xl border border-slate-800 bg-slate-900/40 p-2 shadow-2xl backdrop-blur-xs transition-colors duration-300 hover:border-cyan-500/30"
             >
-              {/* Primary Cybersecurity 3D Hero Image */}
               <img
                 src="/sentinelforge-hero.png"
-                alt="SentinelForge AI-powered cybersecurity workspace"
-                className="w-full h-auto max-h-[420px] object-contain rounded-xl block relative z-10"
+                alt="SentinelForge AI-powered cybersecurity workspace hero"
+                className="w-full h-auto max-h-[440px] object-contain rounded-xl block relative z-10"
               />
-
-              {/* Floating Capability 1 (Top-Left) */}
-              <div
-                style={{
-                  transform: prefersReducedMotion
-                    ? 'none'
-                    : `translate3d(${-tilt.translateX * 1.4}px, ${-tilt.translateY * 1.4}px, 30px)`,
-                  transition: isHovered ? 'transform 0.1s cubic-bezier(0.2, 0, 0.2, 1)' : 'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
-                }}
-                className="absolute -top-3 -left-3 sm:-top-5 sm:-left-5 z-20 flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-700 bg-slate-900/90 shadow-xl backdrop-blur-md transition-all hover:scale-105 hover:border-red-500/40"
-              >
-                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-red-500/15 text-red-400 border border-red-500/30 shrink-0">
-                  <ShieldAlert size={15} />
-                </div>
-                <div className="flex flex-col text-left">
-                  <span className="text-xs font-semibold text-slate-100">Vulnerability Analysis</span>
-                  <span className="text-[10px] text-slate-400">Detect security weaknesses</span>
-                </div>
-              </div>
-
-              {/* Floating Capability 2 (Top-Right) */}
-              <div
-                style={{
-                  transform: prefersReducedMotion
-                    ? 'none'
-                    : `translate3d(${tilt.translateX * 1.4}px, ${-tilt.translateY * 1.4}px, 30px)`,
-                  transition: isHovered ? 'transform 0.1s cubic-bezier(0.2, 0, 0.2, 1)' : 'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
-                }}
-                className="absolute -top-3 -right-3 sm:-top-5 sm:-right-5 z-20 flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-700 bg-slate-900/90 shadow-xl backdrop-blur-md transition-all hover:scale-105 hover:border-cyan-500/40"
-              >
-                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-cyan-500/15 text-cyan-400 border border-cyan-500/30 shrink-0">
-                  <MessageSquare size={15} />
-                </div>
-                <div className="flex flex-col text-left">
-                  <span className="text-xs font-semibold text-slate-100">AI Security Chat</span>
-                  <span className="text-[10px] text-slate-400">Ask cybersecurity questions</span>
-                </div>
-              </div>
-
-              {/* Floating Capability 3 (Bottom-Left) */}
-              <div
-                style={{
-                  transform: prefersReducedMotion
-                    ? 'none'
-                    : `translate3d(${-tilt.translateX * 1.4}px, ${tilt.translateY * 1.4}px, 30px)`,
-                  transition: isHovered ? 'transform 0.1s cubic-bezier(0.2, 0, 0.2, 1)' : 'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
-                }}
-                className="absolute -bottom-3 -left-3 sm:-bottom-5 sm:-left-5 z-20 flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-700 bg-slate-900/90 shadow-xl backdrop-blur-md transition-all hover:scale-105 hover:border-blue-500/40"
-              >
-                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-500/15 text-blue-400 border border-blue-500/30 shrink-0">
-                  <FileSearch size={15} />
-                </div>
-                <div className="flex flex-col text-left">
-                  <span className="text-xs font-semibold text-slate-100">File Analysis</span>
-                  <span className="text-[10px] text-slate-400">Analyze source code & logs</span>
-                </div>
-              </div>
-
-              {/* Floating Capability 4 (Bottom-Right) */}
-              <div
-                style={{
-                  transform: prefersReducedMotion
-                    ? 'none'
-                    : `translate3d(${tilt.translateX * 1.4}px, ${tilt.translateY * 1.4}px, 30px)`,
-                  transition: isHovered ? 'transform 0.1s cubic-bezier(0.2, 0, 0.2, 1)' : 'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
-                }}
-                className="absolute -bottom-3 -right-3 sm:-bottom-5 sm:-right-5 z-20 flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-700 bg-slate-900/90 shadow-xl backdrop-blur-md transition-all hover:scale-105 hover:border-emerald-500/40"
-              >
-                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 shrink-0">
-                  <FileBarChart size={15} />
-                </div>
-                <div className="flex flex-col text-left">
-                  <span className="text-xs font-semibold text-slate-100">Security Reports</span>
-                  <span className="text-[10px] text-slate-400">Review security findings</span>
-                </div>
-              </div>
             </div>
           </div>
         </div>
       </main>
 
-      {/* Footer / Status Indicator */}
-      <footer className="relative z-10 max-w-7xl w-full mx-auto pt-4 shrink-0 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400">
+      {/* Clean Minimal Footer */}
+      <footer className="relative z-10 max-w-7xl w-full mx-auto pt-6 shrink-0 border-t border-slate-800/60 flex items-center justify-between text-xs text-slate-400">
         <div className="flex items-center gap-2">
           <ShieldCheck size={14} className="text-cyan-400" />
           <span>Enterprise AI Security Audit Platform</span>

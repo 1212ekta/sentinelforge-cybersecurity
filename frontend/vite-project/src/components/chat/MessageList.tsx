@@ -118,11 +118,34 @@ const MessageList: React.FC<Props> = ({ messages, onSelectPrompt }) => {
       aria-live="polite"
       aria-relevant="additions"
     >
-      {messages.map((m) => (
-        <MessageBubble key={m.id} message={m} />
-      ))}
+      {messages.map((m, idx) => {
+        let userPromptText = '';
+        if (m.role === 'assistant') {
+          for (let k = idx - 1; k >= 0; k--) {
+            if (messages[k].role === 'user') {
+              userPromptText = messages[k].content;
+              break;
+            }
+          }
+        }
+        const isLatestAssistantMessage =
+          m.role === 'assistant' &&
+          m.status === 'complete' &&
+          !messages.slice(idx + 1).some((msg) => msg.role === 'user' || msg.role === 'assistant');
+
+        return (
+          <MessageBubble
+            key={m.id}
+            message={m}
+            userPromptText={userPromptText}
+            onSelectPrompt={onSelectPrompt}
+            isLatestAssistantMessage={isLatestAssistantMessage}
+          />
+        );
+      })}
     </div>
   );
 };
+
 
 export default React.memo(MessageList);

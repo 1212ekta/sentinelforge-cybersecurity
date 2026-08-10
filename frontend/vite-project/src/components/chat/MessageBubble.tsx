@@ -1,17 +1,26 @@
 'use client';
 
-import React from "react";
-import { Copy, RefreshCw, ShieldCheck, User, Check } from "lucide-react";
+import React, { useMemo } from "react";
+import { Copy, RefreshCw, ShieldCheck, User, Check, Sparkles, ArrowUpRight } from "lucide-react";
 import { ChatMessage, useChat } from "@/features/chat/hooks/useChat";
 import { MessageMarkdown } from "../markdown/MessageMarkdown";
 import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
+import { generateFollowUpQuestions } from "@/features/chat/utils/followUpGenerator";
 import { cn } from "@/utils/cn";
 
 type Props = {
   message: ChatMessage;
+  userPromptText?: string;
+  onSelectPrompt?: (prompt: string) => void;
+  isLatestAssistantMessage?: boolean;
 };
 
-const MessageBubble: React.FC<Props> = ({ message }) => {
+const MessageBubble: React.FC<Props> = ({
+  message,
+  userPromptText = "",
+  onSelectPrompt,
+  isLatestAssistantMessage = false,
+}) => {
   const { retryMessage } = useChat();
   const { copied, copy } = useCopyToClipboard();
 
@@ -27,6 +36,13 @@ const MessageBubble: React.FC<Props> = ({ message }) => {
       retryMessage(message.id);
     }
   };
+
+  const followUpQuestions = useMemo(() => {
+    if (isAssistant && message.status === "complete" && message.content) {
+      return generateFollowUpQuestions(userPromptText, message.content);
+    }
+    return [];
+  }, [isAssistant, message.status, message.content, userPromptText]);
 
   return (
     <div
@@ -106,6 +122,28 @@ const MessageBubble: React.FC<Props> = ({ message }) => {
           </span>
         )}
       </div>
+
+      {/* Contextual Explore Next Section */}
+      {isAssistant && message.status === "complete" && isLatestAssistantMessage && onSelectPrompt && followUpQuestions.length > 0 && (
+        <div className="w-full max-w-[90%] sm:max-w-[85%] mt-2 pt-3 border-t border-border/50 flex flex-col gap-2 animate-fade-in">
+          <div className="flex items-center gap-1.5 text-xs font-semibold text-foreground/90">
+            <Sparkles size={13} className="text-primary shrink-0" />
+            <span>Explore next</span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full">
+            {followUpQuestions.map((q, idx) => (
+              <button
+                key={idx}
+                onClick={() => onSelectPrompt(q)}
+                className="flex items-center justify-between gap-2 p-2.5 rounded-lg border border-border bg-card/80 hover:bg-muted/80 hover:border-primary/40 hover:-translate-y-0.5 transition-all text-left text-xs font-medium text-foreground cursor-pointer group shadow-2xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              >
+                <span className="truncate">{q}</span>
+                <ArrowUpRight size={13} className="text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

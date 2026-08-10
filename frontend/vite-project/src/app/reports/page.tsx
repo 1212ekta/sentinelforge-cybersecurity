@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { FileText, Download, Eye, RefreshCw, Calendar, ShieldCheck, FileQuestion, FileBarChart } from 'lucide-react';
+import { FileText, Download, Eye, RefreshCw, ShieldCheck, FileQuestion, FileBarChart } from 'lucide-react';
 import { ReportModal } from '@/features/security-analysis/components/ReportModal';
 import { config } from '@/lib/config';
 import type { ReportResponse } from '@/features/security-analysis/types/security-analysis.types';
@@ -13,6 +13,8 @@ interface StoredReport {
   format: string;
   content: string;
   created_at: string;
+  severity?: string;
+  type?: string;
 }
 
 export default function ReportsPage() {
@@ -59,24 +61,24 @@ export default function ReportsPage() {
 
   return (
     <div className="h-full w-full overflow-y-auto p-4 sm:p-8 bg-background text-foreground">
-      <div className="max-w-4xl w-full mx-auto flex flex-col gap-6 pb-16">
+      <div className="max-w-5xl w-full mx-auto flex flex-col gap-6 pb-16">
 
         {/* Header */}
         <div className="flex items-center justify-between border-b border-border pb-4 gap-3">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20 shrink-0">
-              <FileBarChart size={22} />
+            <div className="flex h-10 w-10 items-center justify-center rounded-md bg-primary/10 text-primary border border-primary/20 shrink-0">
+              <FileBarChart size={20} />
             </div>
             <div>
-              <h1 className="text-lg sm:text-xl font-bold tracking-tight text-foreground">Security Assessment Reports</h1>
-              <p className="text-xs text-muted-foreground">View and download generated markdown executive security assessments stored in database storage.</p>
+              <h1 className="text-lg font-bold tracking-tight text-foreground">Security Assessment Reports</h1>
+              <p className="text-xs text-muted-foreground">View and download generated markdown executive security assessments.</p>
             </div>
           </div>
 
           <button
             onClick={fetchReports}
             disabled={loading}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border bg-card text-xs font-medium text-foreground hover:bg-muted cursor-pointer shrink-0"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-border bg-card text-xs font-medium text-foreground hover:bg-muted cursor-pointer shrink-0 transition-colors"
           >
             <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
             <span>Refresh</span>
@@ -86,80 +88,95 @@ export default function ReportsPage() {
         {/* Content */}
         {loading ? (
           <div className="flex flex-col items-center justify-center p-12 text-center text-muted-foreground gap-2">
-            <RefreshCw size={24} className="animate-spin text-primary" />
-            <p className="text-xs">Loading security reports...</p>
+            <RefreshCw size={22} className="animate-spin text-primary" />
+            <p className="text-xs font-normal">Loading security reports...</p>
           </div>
         ) : error ? (
-          <div className="p-4 rounded-xl border border-red-500/30 bg-red-500/10 text-red-500 text-xs font-medium">
+          <div className="p-4 rounded-md border border-danger/30 bg-danger/10 text-danger text-xs font-medium">
             {error}
           </div>
         ) : reports.length === 0 ? (
-          <div className="flex flex-col items-center justify-center p-12 rounded-xl border border-border bg-card text-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-muted/60 text-muted-foreground">
-              <FileQuestion size={24} />
+          <div className="flex flex-col items-center justify-center p-12 rounded-md border border-border bg-card text-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-md bg-muted/60 text-muted-foreground">
+              <FileQuestion size={22} />
             </div>
             <div>
               <h3 className="text-sm font-bold text-foreground">No security reports yet.</h3>
-              <p className="text-xs text-muted-foreground mt-1 max-w-sm">
+              <p className="text-xs text-muted-foreground mt-1 max-w-sm font-normal leading-relaxed">
                 Run a security analysis to generate your first report.
               </p>
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-3">
-            {reports.map((rep) => (
-              <div
-                key={rep.id}
-                className="flex items-center justify-between p-4 rounded-xl border border-border bg-card hover:border-primary/40 transition-colors gap-3"
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary shrink-0">
-                    <FileText size={18} />
-                  </div>
-                  <div className="flex flex-col min-w-0">
-                    <div className="flex items-center gap-2">
-                      <h3 className="text-xs sm:text-sm font-semibold text-foreground truncate">{rep.title}</h3>
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-500 text-[10px] font-medium border border-emerald-500/20">
-                        <ShieldCheck size={10} />
-                        <span>Verified</span>
+          <div className="overflow-x-auto rounded-md border border-border bg-card shadow-2xs">
+            <table className="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr className="border-b border-border bg-muted/40 text-muted-foreground font-semibold uppercase text-[10px] tracking-wider">
+                  <th className="py-3 px-4">Report</th>
+                  <th className="py-3 px-4">Type</th>
+                  <th className="py-3 px-4">Severity</th>
+                  <th className="py-3 px-4">Date</th>
+                  <th className="py-3 px-4">Status</th>
+                  <th className="py-3 px-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border/60">
+                {reports.map((rep) => (
+                  <tr key={rep.id} className="hover:bg-muted/30 transition-colors">
+                    <td className="py-3 px-4 font-semibold text-foreground">
+                      <div className="flex items-center gap-2 max-w-xs">
+                        <FileText size={15} className="text-primary shrink-0" />
+                        <span className="truncate">{rep.title}</span>
+                      </div>
+                    </td>
+                    <td className="py-3 px-4 font-mono text-muted-foreground">
+                      {rep.type || 'SAST Audit'}
+                    </td>
+                    <td className="py-3 px-4">
+                      <span className="px-2 py-0.5 rounded bg-severity-medium/10 text-severity-medium border border-severity-medium/20 text-[10px] font-bold uppercase">
+                        {rep.severity || 'Medium'}
                       </span>
-                    </div>
-                    <div className="flex items-center gap-2 text-[11px] text-muted-foreground mt-0.5">
-                      <Calendar size={12} className="shrink-0" />
-                      <span>{new Date(rep.created_at).toLocaleString()}</span>
-                      <span>•</span>
-                      <span className="font-mono">{rep.format.toUpperCase()}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2 shrink-0">
-                  <button
-                    onClick={() =>
-                      setActiveReportModal({
-                        success: true,
-                        report_id: rep.id,
-                        analysis_id: rep.analysis_id,
-                        title: rep.title,
-                        markdown_content: rep.content,
-                        created_at: rep.created_at,
-                      })
-                    }
-                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-border bg-muted/50 text-xs font-medium text-foreground hover:bg-muted cursor-pointer"
-                  >
-                    <Eye size={14} />
-                    <span>View</span>
-                  </button>
-                  <button
-                    onClick={() => handleDownloadMarkdown(rep.analysis_id, rep.title)}
-                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 cursor-pointer"
-                  >
-                    <Download size={14} />
-                    <span>Download</span>
-                  </button>
-                </div>
-              </div>
-            ))}
+                    </td>
+                    <td className="py-3 px-4 text-muted-foreground whitespace-nowrap">
+                      {new Date(rep.created_at).toLocaleDateString()}
+                    </td>
+                    <td className="py-3 px-4">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-500 text-[10px] font-semibold border border-emerald-500/20">
+                        <ShieldCheck size={11} />
+                        <span>Completed</span>
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 text-right whitespace-nowrap">
+                      <div className="inline-flex items-center gap-2 justify-end">
+                        <button
+                          onClick={() =>
+                            setActiveReportModal({
+                              success: true,
+                              report_id: rep.id,
+                              analysis_id: rep.analysis_id,
+                              title: rep.title,
+                              markdown_content: rep.content,
+                              created_at: rep.created_at,
+                            })
+                          }
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md border border-border bg-background text-[11px] font-medium text-foreground hover:bg-muted cursor-pointer transition-colors"
+                        >
+                          <Eye size={13} />
+                          <span>View</span>
+                        </button>
+                        <button
+                          onClick={() => handleDownloadMarkdown(rep.analysis_id, rep.title)}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-primary text-primary-foreground text-[11px] font-medium hover:bg-primary/90 cursor-pointer transition-colors"
+                        >
+                          <Download size={13} />
+                          <span>Download</span>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
       </div>

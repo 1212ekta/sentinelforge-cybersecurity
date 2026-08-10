@@ -87,11 +87,12 @@ const ChatInput: React.FC<ChatInputProps> = ({
       </div>
 
       <div className="flex items-center justify-between px-1 text-[11px] text-muted-foreground/80">
-        <span>Press <kbd className="px-1 py-0.5 rounded bg-muted border border-border text-[10px] font-mono text-muted-foreground">Enter</kbd> to send, <kbd className="px-1 py-0.5 rounded bg-muted border border-border text-[10px] font-mono text-muted-foreground">Shift + Enter</kbd> for newline</span>
+        <span>Enter to send · Shift + Enter for newline</span>
         {value.length > 0 && (
           <span className="font-mono text-[10px]">{value.length} chars</span>
         )}
       </div>
+
     </div>
   );
 };

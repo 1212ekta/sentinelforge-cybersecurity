@@ -32,9 +32,9 @@ export function WelcomeScreen({ onStart }: WelcomeScreenProps) {
     const mouseX = (e.clientX - centerX) / (rect.width / 2); // -1 to 1
     const mouseY = (e.clientY - centerY) / (rect.height / 2); // -1 to 1
 
-    // Subtle 1 to 2.5 degree tilt
-    const maxDegrees = 2.5;
-    const maxShift = 8;
+    // Subtle 1 to 2 degree tilt
+    const maxDegrees = 1.5;
+    const maxShift = 6;
 
     setTilt({
       rotateY: mouseX * maxDegrees,
@@ -100,10 +100,10 @@ export function WelcomeScreen({ onStart }: WelcomeScreenProps) {
             <button
               onClick={onStart}
               aria-label="Start Here to open SentinelForge cybersecurity workspace"
-              className="inline-flex items-center gap-2.5 px-7 py-3.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-semibold text-sm sm:text-base transition-all duration-200 shadow-xl shadow-cyan-950/60 hover:-translate-y-0.5 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 group"
+              className="inline-flex items-center gap-2.5 px-6 py-3 rounded-md bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-sm transition-all duration-normal shadow-md shadow-primary/20 hover:-translate-y-[1px] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring group"
             >
               <span>Start Here</span>
-              <ArrowRight size={18} className="transition-transform duration-200 group-hover:translate-x-1" />
+              <ArrowRight size={18} className="transition-transform duration-normal group-hover:translate-x-[3px]" />
             </button>
 
             <span className="text-xs text-slate-400 font-mono tracking-wide pl-1">
@@ -134,17 +134,18 @@ export function WelcomeScreen({ onStart }: WelcomeScreenProps) {
                 transition: isHovered ? 'transform 0.1s cubic-bezier(0.2, 0, 0.2, 1)' : 'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
                 transformStyle: 'preserve-3d',
               }}
-              className="relative w-full rounded-2xl border border-slate-800 bg-slate-900/40 p-2 shadow-2xl backdrop-blur-xs transition-colors duration-300 hover:border-cyan-500/30"
+              className="relative w-full rounded-md border border-slate-800 bg-slate-900/40 p-2 shadow-2xl backdrop-blur-xs transition-colors duration-normal hover:border-cyan-500/30 hover:scale-[1.01]"
             >
               <img
                 src="/sentinelforge-hero.png"
                 alt="SentinelForge AI-powered cybersecurity workspace hero"
-                className="w-full h-auto max-h-[440px] object-contain rounded-xl block relative z-10"
+                className="w-full h-auto max-h-[440px] object-contain rounded-sm block relative z-10"
               />
             </div>
           </div>
         </div>
       </main>
+
 
       {/* Clean Minimal Footer */}
       <footer className="relative z-10 max-w-7xl w-full mx-auto pt-6 shrink-0 border-t border-slate-800/60 flex items-center justify-between text-xs text-slate-400">

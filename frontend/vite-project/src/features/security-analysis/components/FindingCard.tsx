@@ -14,31 +14,32 @@ export function FindingCard({ finding, onViewDetails }: Props) {
     switch (sev.toUpperCase()) {
       case 'CRITICAL':
         return {
-          style: 'bg-red-500/10 text-red-500 border-red-500/30',
+          style: 'bg-severity-critical/10 text-severity-critical border-severity-critical/30',
           icon: ShieldAlert,
         };
       case 'HIGH':
         return {
-          style: 'bg-orange-500/10 text-orange-500 border-orange-500/30',
+          style: 'bg-severity-high/10 text-severity-high border-severity-high/30',
           icon: AlertTriangle,
         };
       case 'MEDIUM':
         return {
-          style: 'bg-amber-500/10 text-amber-500 border-amber-500/30',
+          style: 'bg-severity-medium/10 text-severity-medium border-severity-medium/30',
           icon: AlertTriangle,
         };
       case 'LOW':
         return {
-          style: 'bg-blue-500/10 text-blue-500 border-blue-500/30',
+          style: 'bg-severity-low/10 text-severity-low border-severity-low/30',
           icon: Shield,
         };
       default:
         return {
-          style: 'bg-slate-500/10 text-slate-400 border-slate-500/30',
+          style: 'bg-severity-info/10 text-severity-info border-severity-info/30',
           icon: Info,
         };
     }
   };
+
 
 
   const badge = getSeverityBadge(finding.severity);

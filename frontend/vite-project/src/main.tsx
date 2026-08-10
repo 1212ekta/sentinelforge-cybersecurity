@@ -48,14 +48,20 @@ function MainApp() {
     };
   }, []);
 
+  useEffect(() => {
+    if (hasVisited && (currentPath === '/' || currentPath === '')) {
+      window.history.replaceState({}, '', '/chat');
+      setCurrentPath('/chat');
+    }
+  }, [hasVisited, currentPath]);
+
   const handleStart = () => {
     localStorage.setItem('sf_welcome_completed', 'true');
     setHasVisited(true);
-    if (currentPath === '/' || currentPath === '/welcome') {
-      window.history.pushState({}, '', '/chat');
-      setCurrentPath('/chat');
-    }
+    window.history.pushState({}, '', '/chat');
+    setCurrentPath('/chat');
   };
+
 
   if (!hasVisited || currentPath === '/welcome') {
     return <WelcomeScreen onStart={handleStart} />;

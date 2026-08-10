@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { ShieldAlert, MessageSquare, FileSearch, FileBarChart, ArrowRight, ShieldCheck } from 'lucide-react';
-import { ThemeToggle } from '@/components/layout/ThemeToggle';
+
 
 interface WelcomeScreenProps {
   onStart: () => void;
@@ -69,11 +69,9 @@ export function WelcomeScreen({ onStart }: WelcomeScreenProps) {
           <span className="font-extrabold text-white text-sm sm:text-base tracking-tight font-mono">
             SentinelForge
           </span>
-
         </div>
-
-        <ThemeToggle />
       </header>
+
 
       {/* Main Two-Column Hero Experience */}
       <main className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center max-w-7xl w-full mx-auto my-auto py-6 sm:py-10">

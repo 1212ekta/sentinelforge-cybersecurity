@@ -4,6 +4,61 @@
 
 @layer base {
   :root {
+    /* Dark-first Cybersecurity Palette (Default & .dark) */
+    --background: 222 47% 5%; /* #07111F */
+    --foreground: 210 20% 96%;
+
+    --sidebar: 222 45% 6.5%; /* #0B1424 */
+    --sidebar-foreground: 210 20% 92%;
+
+    --card: 222 40% 9.5%; /* #0F1A2D */
+    --card-surface: 222 36% 12%; /* #14223A */
+    --card-foreground: 210 20% 96%;
+
+    --primary: 217 91% 60%; /* Restrained Electric Blue */
+    --primary-foreground: 222 47% 5%;
+
+    --accent: 187 85% 50%; /* Cyan / Teal Accent */
+
+    --muted: 222 30% 13%;
+    --muted-foreground: 215 16% 62%;
+
+    --border: 222 25% 16%;
+    --ring: 217 91% 60%;
+
+    --danger: 0 72% 51%;
+    --success: 142 69% 45%;
+    --warning: 38 92% 50%;
+
+    /* Centralized Severity Tokens (Color + Paired Foreground) */
+    --severity-critical: 0 84% 60%;
+    --severity-critical-fg: 0 0% 100%;
+
+    --severity-high: 14 90% 55%;
+    --severity-high-fg: 0 0% 100%;
+
+    --severity-medium: 38 92% 50%;
+    --severity-medium-fg: 222 47% 5%;
+
+    --severity-low: 217 91% 60%;
+    --severity-low-fg: 0 0% 100%;
+
+    --severity-info: 215 16% 55%;
+    --severity-info-fg: 0 0% 100%;
+
+    /* Radius Scale Tokens */
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+
+    /* Animation Duration Tokens (150-250ms range) */
+    --duration-fast: 150ms;
+    --duration-normal: 200ms;
+    --duration-slow: 250ms;
+  }
+
+  .light {
+    /* Optional Light Theme Override Token Mapping */
     --background: 210 20% 98%;
     --foreground: 222 47% 11%;
 
@@ -11,48 +66,38 @@
     --sidebar-foreground: 222 47% 11%;
 
     --card: 0 0% 100%;
+    --card-surface: 210 20% 95%;
     --card-foreground: 222 47% 11%;
 
-    --primary: 221 83% 53%;
+    --primary: 217 91% 53%;
     --primary-foreground: 210 40% 98%;
 
-    --accent-cyan: 187 85% 43%;
+    --accent: 187 85% 43%;
 
     --muted: 210 20% 94%;
     --muted-foreground: 215 16% 47%;
 
     --border: 214 32% 91%;
-    --ring: 221 83% 53%;
+    --ring: 217 91% 53%;
 
     --danger: 0 72% 51%;
     --success: 142 69% 40%;
     --warning: 38 92% 50%;
-  }
 
-  .dark {
-    --background: 222 47% 6%;
-    --foreground: 210 20% 96%;
+    --severity-critical: 0 84% 55%;
+    --severity-critical-fg: 0 0% 100%;
 
-    --sidebar: 222 47% 7.5%;
-    --sidebar-foreground: 210 20% 92%;
+    --severity-high: 14 90% 50%;
+    --severity-high-fg: 0 0% 100%;
 
-    --card: 222 40% 9.5%;
-    --card-foreground: 210 20% 96%;
+    --severity-medium: 38 92% 45%;
+    --severity-medium-fg: 0 0% 100%;
 
-    --primary: 221 83% 60%;
-    --primary-foreground: 222 47% 6%;
+    --severity-low: 217 91% 50%;
+    --severity-low-fg: 0 0% 100%;
 
-    --accent-cyan: 187 85% 53%;
-
-    --muted: 222 30% 13%;
-    --muted-foreground: 215 16% 62%;
-
-    --border: 222 25% 16%;
-    --ring: 221 83% 60%;
-
-    --danger: 0 72% 51%;
-    --success: 142 69% 45%;
-    --warning: 38 92% 50%;
+    --severity-info: 215 16% 45%;
+    --severity-info-fg: 0 0% 100%;
   }
 
   * {
@@ -75,7 +120,7 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-muted-foreground/20 rounded-full hover:bg-muted-foreground/40 transition-colors;
+    @apply bg-muted-foreground/20 rounded-full hover:bg-muted-foreground/40 transition-colors duration-normal;
   }
 }
 
@@ -110,52 +155,24 @@
   }
 }
 
-@keyframes bubbleFloat {
-  0%, 100% {
-    transform: translateY(0px) scale(1);
-  }
-  50% {
-    transform: translateY(-7px) scale(1.03);
-  }
-}
-
-@keyframes bubbleFloatAlt {
-  0%, 100% {
-    transform: translateY(0px) scale(1);
-  }
-  50% {
-    transform: translateY(7px) scale(1.03);
-  }
-}
-
 .animate-message-enter {
-  animation: messageEnter 180ms ease-out forwards;
+  animation: messageEnter var(--duration-normal) ease-out forwards;
 }
 
 .animate-slide-in-left {
-  animation: slideInLeft 200ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: slideInLeft var(--duration-normal) cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .animate-dot-pulse {
   animation: dotPulse 1.2s infinite ease-in-out;
 }
 
-.animate-bubble-float {
-  animation: bubbleFloat 7s ease-in-out infinite;
-}
-
-.animate-bubble-float-alt {
-  animation: bubbleFloatAlt 8s ease-in-out infinite;
-}
-
 @media (prefers-reduced-motion: reduce) {
   .animate-message-enter,
   .animate-slide-in-left,
-  .animate-dot-pulse,
-  .animate-bubble-float,
-  .animate-bubble-float-alt {
+  .animate-dot-pulse {
     animation: none !important;
-    transition: opacity 0.2s ease-out !important;
+    transition: opacity var(--duration-normal) ease-out !important;
     transform: none !important;
   }
 }

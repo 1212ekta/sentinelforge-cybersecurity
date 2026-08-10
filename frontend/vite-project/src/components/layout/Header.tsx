@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Menu, ShieldCheck } from 'lucide-react';
+import { Menu } from 'lucide-react';
 import { NAV_ITEMS } from '@/lib/navigation';
 import { IconButton } from '@/components/ui/IconButton';
 import { ThemeToggle } from './ThemeToggle';
@@ -50,9 +50,9 @@ export function Header({ onOpenMobileNav }: HeaderProps) {
       : pathname?.startsWith(item.href)
   );
 
+  const matchedRoute = activeItem?.href ?? '/chat';
   const title = matchedRoute === '/chat' ? 'AI Security Analyst' : (activeItem?.label ?? 'SentinelForge');
   const description = ROUTE_DESCRIPTIONS[matchedRoute] ?? 'AI Cybersecurity Workspace';
-
 
   const handleBrandClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
@@ -81,7 +81,7 @@ export function Header({ onOpenMobileNav }: HeaderProps) {
         >
           <img
             src="/sentinelforge-icon.png"
-            alt="SentinelForge Shield Icon"
+            alt="SentinelForge Shield Logo"
             className="h-6 w-6 sm:h-7 sm:w-7 object-contain rounded-md shrink-0 shadow-2xs"
           />
 
